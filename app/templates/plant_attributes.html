@@ -1,0 +1,285 @@
+{% extends 'layout.html' %}
+
+{% block title %}Plant Attributes{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Attributes of Plant {{ attributes.PlantID }}: {{ attributes.BotanicalName }}</h2>
+
+            <form action="{{ url_for('admin.update_attributes', plant_id=attributes.PlantID) }}" method="post">
+                <div class="mb-3">
+                    <h2>Conservation Score</h2>
+
+                    <div class="mb-3">
+                        <label for="conservation_id">Conservation Threat Status:</label>
+                        <select name="conservation_id" id="conservation_id" class="form-control">
+                            {% for option in conservation_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.ConservationID %} selected {% endif %}>
+                                {{ option.ConservationThreatStatus }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <h2>Livestock Forage Scores</h2>
+
+                    <div class="mb-3">
+                        <label for="palatability_id">Palatability Status:</label>
+                        <select name="palatability_id" id="palatability_id" class="form-control">
+                            {% for option in palatability_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.PalatabilityID %} selected {% endif %}>
+                                {{ option.Level }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="defoliation_id">Tolerance to Defoliation:</label>
+                        <select name="defoliation_id" id="defoliation_id" class="form-control">
+                            {% for option in defoliation_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.DefoliationID %} selected {% endif %}>
+                                {{ option.ToleranceToDefoliation }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="growthrate_id">Growth Rate:</label>
+                        <select name="growthrate_id" id="growthrate_id" class="form-control">
+                            {% for option in growthrate_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.GrowthRateID %} selected {% endif %}>
+                                {{ option.GrowthRate }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="toxic_id">Quantity of Toxic Elements:</label>
+                        <select name="toxic_id" id="toxic_id" class="form-control">
+                            {% for option in toxic_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.ToxicPartsID %} selected {% endif %}>
+                                {{ option.ToxicParts }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+        
+                    <h2>Shade and Shelter Scores</h2>
+
+                    <div class="mb-3">
+                        <label for="height_id">Plant Height (m):</label>
+                        <select name="height_id" id="height_id" class="form-control">
+                            {% for option in height_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.HeightID %} selected {% endif %}>
+                                {{ option['PlantHeight (m)'] }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shade_id">Shade:</label>
+                        <select name="shade_id" id="shade_id" class="form-control">
+                            {% for option in shade_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.ShadeID %} selected {% endif %}>
+                                {{ option.ShadeClass }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shelter_id">Shelter:</label>
+                        <select name="shelter_id" id="shelter_id" class="form-control">
+                            {% for option in shelter_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.ShelterID %} selected {% endif %}>
+                                {{ option.ShelterClass }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="canopy_id">Canopy:</label>
+                        <select name="canopy_id" id="canopy_id" class="form-control">
+                            {% for option in canopy_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.CanopyID %} selected {% endif %}>
+                                {{ option.CanopySize }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <h2>Bush Bird Habitat Scores</h2>
+
+                    <div class="mb-3">
+                        <label for="foodsource_id">Food Source:</label>
+                        <select name="foodsource_id" id="foodsource_id" class="form-control">
+                            {% for option in foodsource_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.FoodSourceID %} selected {% endif %}>
+                                {{ option.SourceQuantity }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="birdnestingsite_id">Bird Nesting Sites:</label>
+                        <select name="birdnestingsite_id" id="birdnestingsite_id" class="form-control">
+                            {% for option in birdnestingsite_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.BirdID %} selected {% endif %}>
+                                {{ option.Level }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+            
+                    <h2>Environment Scores</h2>
+
+                    <div class="mb-3">
+                        <label for="droughttolerance_id">Drought Tolerance:</label>
+                        <select name="droughttolerance_id" id="droughttolerance_id" class="form-control">
+                            {% for option in droughttolerance_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.DroughtToleranceID %} selected {% endif %}>
+                                {{ option.DroughtTolerance }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="frosttolerance_id">Frost Tolerance:</label>
+                        <select name="frosttolerance_id" id="frosttolerance_id" class="form-control">
+                            {% for option in frosttolerance_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.FrostToleranceID %} selected {% endif %}>
+                                {{ option.FrostTolerance }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="windtolerance_id">Wind Tolerance:</label>
+                        <select name="windtolerance_id" id="windtolerance_id" class="form-control">
+                            {% for option in windtolerance_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.WindToleranceID %} selected {% endif %}>
+                                {{ option.WindTolerance }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="salttolerance_id">Salt Tolerance:</label>
+                        <select name="salttolerance_id" id="salttolerance_id" class="form-control">
+                            {% for option in salttolerance_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SaltToleranceID %} selected {% endif %}>
+                                {{ option.SaltTolerance }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sunpreference_id">Sun/Shade:</label>
+                        <select name="sunpreference_id" id="sunpreference_id" class="form-control">
+                            {% for option in sunpreference_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SunPreferencesID %} selected {% endif %}>
+                                {{ option.SunPreferences }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                        
+                    <h2>Soil Scores</h2>
+
+                    <div class="mb-3">
+                        <label for="soildrainage_id">Soil Drainage:</label>
+                        <select name="soildrainage_id" id="soildrainage_id" class="form-control">
+                            {% for option in soildrainage_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SoilDrainageID %} selected {% endif %}>
+                                {{ option.SoilDrainage }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="soildepth_id">Soil Depth:</label>
+                        <select name="soildepth_id" id="soildepth_id" class="form-control">
+                            {% for option in soildepth_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SoilDepthID %} selected {% endif %}>
+                                {{ option.SoilDepth }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="soilmoisture_id">Soil Moisture:</label>
+                        <select name="soilmoisture_id" id="soilmoisture_id" class="form-control">
+                            {% for option in soilmoisture_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SoilMoistureID %} selected {% endif %}>
+                                {{ option.SoilMoisture }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="soiltype_id">Soil Type:</label>
+                        <select name="soiltype_id" id="soiltype_id" class="form-control">
+                            {% for option in soiltype_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.SoilTypeID %} selected {% endif %}>
+                                {{ option.SoilType }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                        
+                    <h2>Wetland Score</h2>
+                    
+                    <div class="mb-3">
+                        <label for="wetland_id">Wetland:</label>
+                        <select name="wetland_id" id="wetland_id" class="form-control">
+                            {% for option in wetland_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.WetlandID %} selected {% endif %}>
+                                {{ option.WetlandType }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                        
+                    <h2>Flammability Score</h2>
+
+                    <div class="mb-3">
+                        <label for="flammability_id">Flammability:</label>
+                        <select name="flammability_id" id="flammability_id" class="form-control">
+                            {% for option in flammability_options %}
+                            <option value="{{ option.ID }}" {% if option.ID == attributes.FlammabilityID %} selected {% endif %}>
+                                {{ option.Flammability }} (Score: {{ option.Score }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="margin-bottom: 30px;">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">18903400.0000000</mso:Order>
+<mso:xd_ProgID msdt:dt="string"></mso:xd_ProgID>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:SharedWithUsers msdt:dt="string"></mso:SharedWithUsers>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TemplateUrl msdt:dt="string"></mso:TemplateUrl>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:ContentTypeId msdt:dt="string">0x0101002F762B7C5F8C1B44A969538F1EBF5320</mso:ContentTypeId>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+<mso:MediaLengthInSeconds msdt:dt="string"></mso:MediaLengthInSeconds>
+<mso:TaxCatchAll msdt:dt="string"></mso:TaxCatchAll>
+<mso:MediaServiceImageTags msdt:dt="string"></mso:MediaServiceImageTags>
+<mso:lcf76f155ced4ddcb4097134ff3c332f msdt:dt="string"></mso:lcf76f155ced4ddcb4097134ff3c332f>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+<title></title></head>

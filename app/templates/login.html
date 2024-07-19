@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+
+<!-- Login form -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="col-lg-6 col-md-7 wow fadeInUp" data-wow-delay="0.3s">
+           
+            <h1 class="display-5 mb-4">Login</h1>
+      
+            <br>
+            <form action="{{ url_for('user.login', next=next) }}" method="post">
+                <input type="hidden" name="next" value="{{ next }}">
+                <div class="form-group">
+                    <label for="email">Email <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" id="email" name="email" value="{{ request.form.email }}" required>
+                    {% if error_message and error_message.email %}
+                        <p class="text-danger">{{ error_message.email }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="password">Password <span style="color: red;">*</span></label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <br>
+                    <input type="checkbox" id="togglePassword"> View Password
+                    {% if error_message and error_message.password %}
+                    <p class="text-danger">{{ error_message.password }}</p>
+                    {% endif %}
+                </div>
+                <br>
+                <button type="submit" class="btn btn-primary" ><span>Login</span></button>
+            </form>
+            
+            <!-- Register link -->
+            <p class="mt-3">Don't have an account? <a href="{{ url_for('user.register') }}"><span style="color: red;">Register here</span></a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function (e) {
+        var passwordInput = document.getElementById('password');
+    
+        if (this.checked) {
+            passwordInput.type = 'text';
+        } else {
+            passwordInput.type = 'password';
+        }
+    });
+</script>
+
+{% endblock %}
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">18903300.0000000</mso:Order>
+<mso:xd_ProgID msdt:dt="string"></mso:xd_ProgID>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:SharedWithUsers msdt:dt="string"></mso:SharedWithUsers>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TemplateUrl msdt:dt="string"></mso:TemplateUrl>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:ContentTypeId msdt:dt="string">0x0101002F762B7C5F8C1B44A969538F1EBF5320</mso:ContentTypeId>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+<mso:MediaLengthInSeconds msdt:dt="string"></mso:MediaLengthInSeconds>
+<mso:TaxCatchAll msdt:dt="string"></mso:TaxCatchAll>
+<mso:MediaServiceImageTags msdt:dt="string"></mso:MediaServiceImageTags>
+<mso:lcf76f155ced4ddcb4097134ff3c332f msdt:dt="string"></mso:lcf76f155ced4ddcb4097134ff3c332f>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+<title></title></head>

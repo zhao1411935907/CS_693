@@ -1,0 +1,268 @@
+{% extends 'layout.html' %}
+
+{% block title %}Add a Plant{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2>Add New Plant</h2>
+
+            <form action="{{ url_for('admin.add_plant') }}" method="post" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="botanicalName" class="form-label">Botanical Name <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" id="botanicalName" name="botanicalName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="commonName" class="form-label">Common Name <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" id="commonName" name="commonName" required>
+                </div>
+                <div class="mb-3">
+                    <label for="family" class="form-label">Family <span style="color: red;">*</span></label>
+                    <input type="text" class="form-control" id="family" name="family" required>
+                </div>
+                <div class="mb-3">
+                    <label for="distribution" class="form-label">Distribution</label>
+                    <input type="text" class="form-control" id="distribution" name="distribution">
+                </div>
+                <div class="mb-3">
+                    <label for="habitat" class="form-label">Habitat</label>
+                    <input type="text" class="form-control" id="habitat" name="habitat">
+                </div>
+                <div class="mb-3">
+                    <label for="note" class="form-label">Note</label>
+                    <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="image" class="form-label">Plant Image</label>
+                    <input type="file" class="form-control" id="image" name="image" accept="image/png, image/jpeg, image/jpg">
+                </div>
+
+                <!-----------------------------------------plant attribute-------------------------------------------------------->
+                <div class="mb-3">
+                    <div class="mb-3">
+                        <label for="conservationThreatStatus" class="form-label">Conservation Threat Status</label>
+                        <select class="form-control" id="conservationThreatStatus" name="conservationThreatStatus">
+                            {% for conservation in conservation_options %}
+                            <option value="{{ conservation.ID }}">{{ conservation.ConservationThreatStatus }} (Score: {{ conservation.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="palatability" class="form-label">Palatability</label>
+                        <select class="form-control" id="palatability" name="palatability">
+                            {% for palatability in palatability_options %}
+                            <option value="{{ palatability.ID }}">{{ palatability.Level }} (Score: {{ palatability.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="defoliation" class="form-label">Defoliation</label>
+                        <select class="form-control" id="defoliation" name="defoliation">
+                            {% for defoliation in defoliation_options %}
+                            <option value="{{ defoliation.ID }}">{{ defoliation.ToleranceToDefoliation }} (Score: {{ defoliation.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="growthrate" class="form-label"> Growth Rate</label>
+                        <select class="form-control" id="growthrate" name="growthrate">
+                            {% for growthrate in growthrate_options %}
+                            <option value="{{ growthrate.ID }}">{{ growthrate.GrowthRate }} (Score: {{ growthrate.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="toxic" class="form-label"> Toxic Parts</label>
+                        <select class="form-control" id="toxic" name="toxic">
+                            {% for toxicparts in toxicparts_options %}
+                            <option value="{{ toxicparts.ID }}">{{ toxicparts.ToxicParts }} (Score: {{ toxicparts.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="height" class="form-label"> Height</label>
+                        <select class="form-control" id="height" name="height">
+                            {% for height in height_options %}
+                            <option value="{{ height.ID }}">{{ height['PlantHeight (m)'] }} (Score: {{ height.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="shade" class="form-label"> Shade</label>
+                        <select class="form-control" id="shade" name="shade">
+                            {% for shade in shade_options %}
+                            <option value="{{ shade.ID }}">{{ shade.ShadeClass }} (Score: {{ shade.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="shelter" class="form-label"> Shelter </label>
+                        <select class="form-control" id="shelter" name="shelter">
+                            {% for shelter in shelter_options %}
+                            <option value="{{ shelter.ID }}">{{ shelter.ShelterClass }} (Score: {{ shelter.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="canopy" class="form-label"> Canopy </label>
+                        <select class="form-control" id="canopy" name="canopy">
+                            {% for canopy in canopy_options %}
+                            <option value="{{ canopy.ID }}">{{ canopy.CanopySize }} (Score: {{ canopy.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="foodsource" class="form-label"> Food Sources </label>
+                        <select class="form-control" id="foodsource" name="foodsource">
+                            {% for foodsource in foodsource_options %}
+                            <option value="{{ foodsource.ID }}">{{ foodsource.SourceQuantity }} (Score: {{ foodsource.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bird" class="form-label"> Bird Nesting Sites </label>
+                        <select class="form-control" id="bird" name="bird">
+                            {% for birdnestingsite in birdnestingsite_options %}
+                            <option value="{{ birdnestingsite.ID }}">{{ birdnestingsite.Level }} (Score: {{ birdnestingsite.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="drought" class="form-label"> Drought Tolerance </label>
+                        <select class="form-control" id="drought" name="drought">
+                            {% for droughttolerance in droughttolerance_options %}
+                            <option value="{{ droughttolerance.ID }}">{{ droughttolerance.DroughtTolerance }} (Score: {{ droughttolerance.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="frost" class="form-label"> Frost Tolerance </label>
+                        <select class="form-control" id="frost" name="frost">
+                            {% for frosttolerance in frosttolerance_options %}
+                            <option value="{{ frosttolerance.ID }}">{{ frosttolerance.FrostTolerance }} (Score: {{ frosttolerance.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="wind" class="form-label"> Wind Tolerance </label>
+                        <select class="form-control" id="wind" name="wind">
+                            {% for windtolerance in windtolerance_options %}
+                            <option value="{{ windtolerance.ID }}">{{ windtolerance.WindTolerance }} (Score: {{ windtolerance.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="salt" class="form-label"> Salt Tolerance </label>
+                        <select class="form-control" id="salt" name="salt">
+                            {% for salttolerance in salttolerance_options %}
+                            <option value="{{ salttolerance.ID }}">{{ salttolerance.SaltTolerance }} (Score: {{ salttolerance.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sun" class="form-label"> Sun Preferences </label>
+                        <select class="form-control" id="sun" name="sun">
+                            {% for sunpreference in sunpreference_options %}
+                            <option value="{{ sunpreference.ID }}">{{ sunpreference.SunPreferences }} (Score: {{ sunpreference.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="drainage" class="form-label"> Soil Drainage </label>
+                        <select class="form-control" id="drainage" name="drainage">
+                            {% for soildrainage in soildrainage_options %}
+                            <option value="{{ soildrainage.ID }}">{{ soildrainage.SoilDrainage }} (Score: {{ soildrainage.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="depth" class="form-label"> Soil Depth </label>
+                        <select class="form-control" id="depth" name="depth">
+                            {% for soildepth in soildepth_options %}
+                            <option value="{{ soildepth.ID }}">{{ soildepth.SoilDepth }} (Score: {{ soildepth.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="moisture" class="form-label"> Soil Moisture  </label>
+                        <select class="form-control" id="moisture" name="moisture">
+                            {% for soilmoisture in soilmoisture_options %}
+                            <option value="{{ soilmoisture.ID }}">{{ soilmoisture.SoilMoisture }} (Score: {{ soilmoisture.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="soiltype" class="form-label"> Soil Type </label>
+                        <select class="form-control" id="soiltype" name="soiltype">
+                            {% for soiltype in soiltype_options %}
+                            <option value="{{ soiltype.ID }}">{{ soiltype.SoilType }} (Score: {{ soiltype.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="wetland" class="form-label"> Wetland </label>
+                        <select class="form-control" id="wetland" name="wetland">
+                            {% for wetland in wetland_options %}
+                            <option value="{{ wetland.ID }}">{{ wetland.WetlandType }} (Score: {{ wetland.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="flammability" class="form-label"> Flammability </label>
+                        <select class="form-control" id="flammability" name="flammability">
+                            {% for flammability in flammability_options %}
+                            <option value="{{ flammability.ID }}">{{ flammability.Flammability }} (Score: {{ flammability.Score }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary form-submit-button" id="submitBtn" style="margin-bottom: 30px;">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>          
+</div>
+{% endblock %}<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">18902600.0000000</mso:Order>
+<mso:xd_ProgID msdt:dt="string"></mso:xd_ProgID>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:SharedWithUsers msdt:dt="string"></mso:SharedWithUsers>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TemplateUrl msdt:dt="string"></mso:TemplateUrl>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:ContentTypeId msdt:dt="string">0x0101002F762B7C5F8C1B44A969538F1EBF5320</mso:ContentTypeId>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+<mso:MediaLengthInSeconds msdt:dt="string"></mso:MediaLengthInSeconds>
+<mso:TaxCatchAll msdt:dt="string"></mso:TaxCatchAll>
+<mso:MediaServiceImageTags msdt:dt="string"></mso:MediaServiceImageTags>
+<mso:lcf76f155ced4ddcb4097134ff3c332f msdt:dt="string"></mso:lcf76f155ced4ddcb4097134ff3c332f>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+<title></title></head>

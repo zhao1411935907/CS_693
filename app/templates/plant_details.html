@@ -1,0 +1,182 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<style>
+  .attribute-section {
+    margin-top: 2rem;
+  }
+  .attribute-column {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  .vertical-divider {
+    border-left: 1px solid #ddd;
+    height: auto;
+  }
+  .btn-heart {
+    position: relative;
+  }
+  .btn-heart:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -30px;
+    left: 0;
+    transform: translateX(-50%);
+    background-color: #fff;
+    color: red;
+    padding: 5px 10px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    display: block;
+    visibility: visible;
+  }
+</style>
+{% endblock %}
+
+{% block title %}Plant Detail{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    {% if not session.get('from_favorites', False) %}
+        {% if session.last_view.view_name == 'search' %}
+            <a href="{{ url_for('main.search', **session.last_view.params) }}" class="back-to-search">
+                <i class="bi bi-backspace"></i> Back 
+            </a>
+        {% elif session.last_view.view_name == 'final_scores' %}
+            <a href="{{ back_url }}" class="back-to-search">
+                <i class="bi bi-backspace"></i> Back
+            </a>
+        {% endif %}
+    {% endif %}
+  
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-md-6" style="width: 500px;height:350px;overflow: hidden;border:1px solid #eeee; margin-right: 100px; margin-bottom: 50px;">
+            {% if plant.Image %}
+                <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + plant.Image) }}" alt="{{ plant.BotanicalName }}" class="img-fluid">
+            {% else %}
+                <img style="width: 100%;height: auto;" src="{{ url_for('static', filename='img/no_img_available.jpg') }}" alt="No image available" class="img-fluid">
+            {% endif %}
+        </div>
+        <div class="col-md-6" >
+            <!-- Plant Details Section -->
+            <h2>
+                {{ plant.BotanicalName }}
+                <button class="btn btn-heart position-absolute {% if is_favorite %}favorited{% endif %}" id="favorite-btn" onclick="toggleFavorite(event, `{{plant.ID}}`)">
+                    <i class="bi bi-heart-fill"></i>
+                </button>
+            </h2>
+            <h3>{{ plant.CommonName }}</h3>
+            <p><strong>Family:</strong> {{ plant.Family }}</p>
+            <p><strong>Distribution:</strong> {{ plant.Distribution }}</p>
+            <p><strong>Habitat:</strong> {{ plant.Habitat }}</p>
+            <br><br><br><br>
+        </div>
+    </div>
+
+    <!-- Plant Attribute Section -->
+    <div class="row attribute-section">
+        <div class="col-md-6 attribute-column">
+            <h4>Conservation</h4>
+            <p><strong>Conservation Threat Status:</strong> {{ plant.ConservationThreatStatus }}</p>
+            
+            <h4>Livestock Forage</h4>
+            <p><strong>Palatability:</strong> {{ plant.Level }}</p>
+            <p><strong>Tolerance To Defoliation:</strong> {{ plant.ToleranceToDefoliation }}</p>
+            <p><strong>Growth Rate:</strong> {{ plant.GrowthRate }}</p>
+            <p><strong>Toxic Elements:</strong> {{ plant.ToxicParts }}</p>
+            
+            <h4>Shade And Shelter</h4>
+            <p><strong>Plant Height (m):</strong> {{ plant['PlantHeight (m)'] }}</p>
+            <p><strong>Shade Provision:</strong> {{ plant.ShadeClass }}</p>
+            <p><strong>Shelter Class:</strong> {{ plant.ShelterClass }}</p>
+            <p><strong>Canopy Size:</strong> {{ plant.CanopySize }}</p>
+
+            <h4>Bush Bird Habitat</h4>
+            <p><strong>Food Sources:</strong> {{ plant.SourceQuantity }}</p>
+            <p><strong>Quantity of Nesting Sites:</strong> {{ plant.Level }}</p>
+        </div>
+
+        <div class="col-md-1 vertical-divider"></div>
+
+        <div class="col-md-5 attribute-column">
+            <h4>Environmental</h4>
+            <p><strong>Drought Tolerance:</strong> {{ plant.DroughtTolerance }}</p>
+            <p><strong>Frost Tolerance:</strong> {{ plant.FrostTolerance }}</p>
+            <p><strong>Wind Tolerance:</strong> {{ plant.WindTolerance }}</p>
+            <p><strong>Salt Tolerance:</strong> {{ plant.SaltTolerance }}</p>
+            <p><strong>Sun/Shade:</strong> {{ plant.SunPreferences }}</p>
+
+            <h4>Soil</h4>
+            <p><strong>Soil Drainage:</strong> {{ plant.SoilDrainage }}</p>
+            <p><strong>Soil Depth:</strong> {{ plant.SoilDepth }}</p>
+            <p><strong>Soil Moisture:</strong> {{ plant.SoilMoisture }}</p>
+            <p><strong>Soil Type:</strong> {{ plant.SoilType }}</p>
+
+            <h4>Wetland</h4>
+            <p><strong>Wetland Type:</strong> {{ plant.WetlandType }}</p>
+
+            <h4>Flammability</h4>
+            <p><strong>Flammability Class:</strong> {{ plant.Flammability }}</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleFavorite(event, plantId) {
+        event.stopPropagation();
+        event.preventDefault();
+  
+        fetch('{{ url_for("user.toggle_favorite") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plant_id: plantId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const favoriteBtn = document.getElementById('favorite-btn');
+            if (data.success) {
+                favoriteBtn.classList.toggle('favorited');
+                favoriteBtn.setAttribute('data-tooltip', favoriteBtn.classList.contains('favorited') ? 'Remove from favorites' : 'Add to favorites');
+                alert(data.message);
+            } else if (data.redirect) {
+                window.location.href = data.redirect;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }  
+</script>
+  
+{% endblock %}
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Editor>
+<mso:Order msdt:dt="string">18903600.0000000</mso:Order>
+<mso:xd_ProgID msdt:dt="string"></mso:xd_ProgID>
+<mso:_ExtendedDescription msdt:dt="string"></mso:_ExtendedDescription>
+<mso:SharedWithUsers msdt:dt="string"></mso:SharedWithUsers>
+<mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author msdt:dt="string">Gao, Dian</mso:display_urn_x003a_schemas-microsoft-com_x003a_office_x003a_office_x0023_Author>
+<mso:ComplianceAssetId msdt:dt="string"></mso:ComplianceAssetId>
+<mso:TemplateUrl msdt:dt="string"></mso:TemplateUrl>
+<mso:TriggerFlowInfo msdt:dt="string"></mso:TriggerFlowInfo>
+<mso:ContentTypeId msdt:dt="string">0x0101002F762B7C5F8C1B44A969538F1EBF5320</mso:ContentTypeId>
+<mso:_SourceUrl msdt:dt="string"></mso:_SourceUrl>
+<mso:_SharedFileIndex msdt:dt="string"></mso:_SharedFileIndex>
+<mso:MediaLengthInSeconds msdt:dt="string"></mso:MediaLengthInSeconds>
+<mso:TaxCatchAll msdt:dt="string"></mso:TaxCatchAll>
+<mso:MediaServiceImageTags msdt:dt="string"></mso:MediaServiceImageTags>
+<mso:lcf76f155ced4ddcb4097134ff3c332f msdt:dt="string"></mso:lcf76f155ced4ddcb4097134ff3c332f>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+<title></title></head>
