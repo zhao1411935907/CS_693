@@ -689,7 +689,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'james@gmail.com','$2b$12$N0pjJS9Od9o2EEy7rpg.XunusNCGDEx5LEE8MiC8kPakKTkPMvTh.','Admin'),(2,'irisgao@gmail.com','$2b$12$hzdlzACYbNl9B/Q.9dqB7.zSc4Q/yjpgFW18OMXk24.zFBt9tvy4m','User');
+INSERT INTO `user` VALUES (1,'james@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','Admin'),(2,'irisgao@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','User');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 
