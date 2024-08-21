@@ -282,7 +282,7 @@ def final_scores():
                 final_scores[plant_id] = 0
             final_scores[plant_id] += entry['OverallScore']
 
-    top_scores = sorted(final_scores.items(), key=lambda item: item[1], reverse=True)[:10]
+    top_scores = sorted(final_scores.items(), key=lambda item: item[1], reverse=True)[:20]
     top_plant_ids = [plant[0] for plant in top_scores]
 
     cursor = getCursor(dictionary_cursor=True)

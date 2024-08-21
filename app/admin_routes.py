@@ -28,7 +28,7 @@ def plant_detail():
 
     page = request.args.get('page', 1, type=int)  # get current page，default as page 1
     search_query = request.args.get('searchQuery', '')
-    per_page = 10 #10 plants per page
+    per_page = 20 #10 plants per page
     offset = (page - 1) * per_page  
 
     #connect to database
