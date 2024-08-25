@@ -22,7 +22,7 @@
         <h1 class="display-5 mb-4">Plant Details</h1>
 
         <!--  search form  -->
-        <div class="col-lg-6 col-md-7 wow fadeInUp" data-wow-delay="0.3s">
+        <div class="col-lg-6 col-md-7 col-sm-12 wow fadeInUp" data-wow-delay="0.3s">
           <form action="{{ url_for('admin.plant_detail') }}" method="GET">
               <div class="input-group mb-3"> 
                   <input type="text" class="form-control" placeholder="Enter Botanical Name or Common Name" name="searchQuery" value="{{ request.args.get('searchQuery', '') }}">
@@ -33,17 +33,17 @@
 
         {% if search_query == '' %}
         <!-- Top Pagination controls aligned to the right -->
-        <div class="d-flex justify-content-end">
+        <div class="d-flex justify-content-end flex-wrap">
           <nav>
               <ul class="pagination">
                   {% if page > 1 %}
-                  <li class="page-item"><a class="page-link" href="{{ url_for('admin.plant_detail', page=page-1, searchQuery=search_query) }}">Previous</a></li>
+                  <li class="page-item"><a class="page-link" href="{{ url_for('admin.plant_detail', page=page-1) }}">Previous</a></li>
                   {% endif %}
                   {% for p in range(1, total_pages + 1) %}
-                  <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('admin.plant_detail', page=p, searchQuery=search_query) }}">{{ p }}</a></li>
+                  <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('admin.plant_detail', page=p) }}">{{ p }}</a></li>
                   {% endfor %}
                   {% if page < total_pages %}
-                  <li class="page-item"><a class="page-link" href="{{ url_for('admin.plant_detail', page=page+1, searchQuery=search_query) }}">Next</a></li>
+                  <li class="page-item"><a class="page-link" href="{{ url_for('admin.plant_detail', page=page+1) }}">Next</a></li>
                   {% endif %}
               </ul>
           </nav>
@@ -64,56 +64,60 @@
           </a>
         </div>
 
-        <table class="table">
-          <thead>
-              <tr>
-                  <th>Plant ID</th>
-                  <th>Botanical Name</th>
-                  <th>Common Name</th>
-                  <th>Family</th>
-                  <th>Distribution</th>
-                  <th>Habitat</th>
-                  <th>Note</th>
-                  <th>Image</th>
-                  <th>Attribute</th>
-                  <th>Edit</th>
-                  <th>Delete</th>
-              </tr>
-          </thead>
-          <tbody>
-              {% for detail in plantdetails %}
-              <tr>
-                  <td>{{ detail.ID }}</td>
-                  <td>{{ detail.BotanicalName }}</td>
-                  <td>{{ detail.CommonName }}</td>
-                  <td>{{ detail.Family }}</td>
-                  <td style="max-width:100px; max-height: 50px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="`{{ detail.Distribution }}`">{{ detail.Distribution }}</td>
-                  <td style="max-width:100px; max-height: 50px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="`{{ detail.Habitat }}`">{{ detail.Habitat }}</td>
-                  <td>{{ detail.Note }}</td>
-                  <td>
-                    <div class="col-md-6" style="width: 150px;height:130px;overflow: hidden;border:1px solid #eeee;">
-                      {% if detail.Image %}
-                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + detail.Image) }}" alt="{{ detail.BotanicalName }}" class="img-fluid">
-                      {% else %}
-                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/no_img_available.jpg') }}" alt="No image available" class="img-fluid">
-                      {% endif %}
-                    </div>
-                  </td>
-                  <td>
-                    <a href="{{ url_for('admin.plant_attributes', plant_id=detail.ID) }}" class="btn btn-primary">View</a>
-                  </td>
-                  <td>
-                    <a href="{{ url_for('admin.edit_plant', plant_id=detail.ID) }}" class="btn btn-primary">Edit  </a>
-                  </td>
-                  <td>
-                    <a href="javascript:confirmDelete({{ detail.ID }});" class="btn btn-danger">
-                      <i class="bi bi-trash3-fill"></i> 
-                    </a>
-                  </td>
-              </tr>
-              {% endfor %}
-          </tbody>
-        </table>
+        <!-- Responsive table -->
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+                <tr>
+                    <th>Plant ID</th>
+                    <th>Botanical Name</th>
+                    <th>Common Name</th>
+                    <th>Family</th>
+                    <th>Distribution</th>
+                    <th>Habitat</th>
+                    <th>Note</th>
+                    <th>Image</th>
+                    <th>Attribute</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for detail in plantdetails %}
+                <tr>
+                    <td>{{ detail.ID }}</td>
+                    <td>{{ detail.BotanicalName }}</td>
+                    <td>{{ detail.CommonName }}</td>
+                    <td>{{ detail.Family }}</td>
+                    <td style="max-width:100px; max-height: 50px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="`{{ detail.Distribution }}`">{{ detail.Distribution }}</td>
+                    <td style="max-width:100px; max-height: 50px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" title="`{{ detail.Habitat }}`">{{ detail.Habitat }}</td>
+                    <td>{{ detail.Note }}</td>
+                    <td>
+                      <div class="col-md-6" style="width: 150px;height:130px;overflow: hidden;border:1px solid #eeee;">
+                        {% if detail.Image %}
+                          <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + detail.Image) }}" alt="{{ detail.BotanicalName }}" class="img-fluid">
+                        {% else %}
+                          <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/no_img_available.jpg') }}" alt="No image available" class="img-fluid">
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      <a href="{{ url_for('admin.plant_attributes', plant_id=detail.ID) }}" class="btn btn-primary" title="View and Update the Attribute weight for this plant">View</a>
+                    </td>
+                    <td>
+                      <a href="{{ url_for('admin.edit_plant', plant_id=detail.ID) }}" class="btn btn-primary" title="Edit the text information of plants">Edit</a>
+                    </td>
+                    <td>
+                      <a href="javascript:confirmDelete({{ detail.ID }});" class="btn btn-danger" title="Completely delete this plant from the database">
+                        <i class="bi bi-trash3-fill"></i>
+                      </a>
+                    </td>
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
         {% endif %}
 
       <!-- Bottom Pagination controls -->
@@ -136,6 +140,7 @@
       {% endif %}
     </div>
 </div>
+
 {% endblock %}<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>

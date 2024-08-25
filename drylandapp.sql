@@ -679,6 +679,8 @@ CREATE TABLE `user` (
   `Email` varchar(255) NOT NULL,
   `Password` varchar(255) NOT NULL,
   `Role` varchar(255) NOT NULL,
+  `Image` varchar(255) DEFAULT NULL,
+  `Name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -689,7 +691,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'james@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','Admin'),(2,'irisgao@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','User');
+INSERT INTO `user` (`ID`, `Email`, `Password`, `Role`) VALUES  (1,'james@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','Admin'),(2,'irisgao@gmail.com','$2b$12$ylOkGroaLh9fSHkD5hW7n.WQAnqAzkFiDmgFfmPzC0k4vMG/klRQi','User');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -21,6 +21,25 @@
                     </table>
                 </div>
 
+                <h5>Personal photo</h5>
+                <form action="{{ url_for('user.image') }}" method="post" class="mb-3" autocomplete="off" enctype="multipart/form-data">
+                    <div class="col-md-6" style="width: 150px;height:130px;overflow: hidden;border:1px solid #eeee;">
+                        {% if account.Image %}
+                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + account.Image) }}" alt="{{ account.ID }}" class="img-fluid">
+                        {% else %}
+                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/update_profile_icon.jpg') }}" alt="No image available" class="img-fluid">
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="Image" class="form-label">Upload New Image:</label>
+                        <input type="file" class="form-control" id="Image" name="Image" accept="image/png, image/jpeg, image/jpg">
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submit-btn" style="display: none;">Submit</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-btn" style="display: none;">Cancel</button>
+                </form>
+
+
+
                 <h5>Change Password</h5>
                 <form action="{{ url_for('user.profile') }}" method="post" class="mb-3" autocomplete="off">
                     <div class="mb-3">
@@ -45,10 +64,15 @@
                 <a href="/user_dashboard" class="btn btn-secondary">Back to Dashboard</a>
                 {% endif %}
             </div>
+
         </div>
     </div>
 </div>
 {% endblock %}
+
+
+
+
 
 <html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
 <!--[if gte mso 9]><xml>

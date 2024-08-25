@@ -6,6 +6,9 @@ import mysql.connector
 import connect
 import bcrypt
 import re 
+from werkzeug.utils import secure_filename
+import os
+from flask import current_app as app
 from datetime import datetime
 
 user_blueprint = Blueprint('user', __name__)
@@ -174,7 +177,7 @@ def contact_us():
 @user_blueprint.route('/profile', methods=['GET', 'POST'])
 def profile():
     if not session.get('loggedin'):
-        return redirect(url_for('login'))
+        return redirect(url_for('user.login'))
     
     cursor = getCursor(dictionary_cursor=True)
     email = session['email']
@@ -221,6 +224,38 @@ def profile():
     
     finally:  
         cursor.close()
+
+
+
+@user_blueprint.route('/image', methods=['GET', 'POST'])
+def image():
+    if not session.get('loggedin'):
+        return redirect(url_for('login'))
+    
+    cursor = getCursor(dictionary_cursor=True)
+    email = session['email']
+    if request.method == 'POST':
+        image = request.files['Image']
+        image_filename = None
+        if image:
+            image_filename = secure_filename(image.filename)
+            save_path = os.path.join('static/img', image_filename)
+            full_save_path = os.path.join(app.root_path, save_path)
+            image.save(full_save_path)
+            update_query = """
+            UPDATE user
+            SET Image=%s
+            WHERE Email = %s
+            """
+            cursor.execute(update_query, (image_filename,email))
+            connection.commit()
+        # get user's information
+    query = 'SELECT * FROM user WHERE Email = %s;'
+    cursor.execute(query, (email,))
+    account = cursor.fetchone()
+    cursor.close()
+    return render_template('profile.html', account=account)
+
 
 
 #this function is used to check if the user input the correct password
