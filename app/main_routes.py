@@ -282,14 +282,26 @@ def final_scores():
                 final_scores[plant_id] = 0
             final_scores[plant_id] += entry['OverallScore']
 
-    top_scores = sorted(final_scores.items(), key=lambda item: item[1], reverse=True)[:20]
-    top_plant_ids = [plant[0] for plant in top_scores]
 
+    ### Query all eligible plant IDs and filter out plants with is_delete=1.        
     cursor = getCursor(dictionary_cursor=True)
+    query = """
+    SELECT pd.ID
+    FROM plantdetail pd
+    WHERE pd.ID IN (%s) AND pd.is_delete = 0
+    """ % ','.join(['%s'] * len(final_scores))
+
+    cursor.execute(query, list(final_scores.keys()))
+    filtered_ids = cursor.fetchall()
+    filtered_ids = [row['ID'] for row in filtered_ids]
+    filtered_final_scores = {plant_id: final_scores[plant_id] for plant_id in filtered_ids}
+    top_scores = sorted(filtered_final_scores.items(), key=lambda item: item[1], reverse=True)[:20]
+    top_plant_ids = [plant[0] for plant in top_scores]
+    
     query = """
     SELECT pd.ID, pd.BotanicalName, pd.CommonName, pd.Family, pd.Distribution, pd.Habitat, pd.Image
     FROM plantdetail pd
-    WHERE pd.ID IN (%s)
+    WHERE pd.ID IN (%s) 
     """ % ','.join(['%s'] * len(top_plant_ids))
 
     cursor.execute(query, top_plant_ids)

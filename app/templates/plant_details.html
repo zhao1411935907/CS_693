@@ -81,23 +81,23 @@
     <div class="row attribute-section">
         <div class="col-md-6 attribute-column">
             <h4>Conservation</h4>
-            <p><strong>Conservation Threat Status:</strong> {{ plant.ConservationThreatStatus }}</p>
+            <p><strong>Conservation Status:</strong> {{ plant.ConservationThreatStatus }}</p>
             
-            <h4>Livestock Forage</h4>
+            <h4>Livestock Feed</h4>
             <p><strong>Palatability:</strong> {{ plant.Level }}</p>
-            <p><strong>Tolerance To Defoliation:</strong> {{ plant.ToleranceToDefoliation }}</p>
+            <p><strong>Tolerance to Defoliation:</strong> {{ plant.ToleranceToDefoliation }}</p>
             <p><strong>Growth Rate:</strong> {{ plant.GrowthRate }}</p>
-            <p><strong>Toxic Elements:</strong> {{ plant.ToxicParts }}</p>
+            <p><strong>Toxic Components:</strong> {{ plant.ToxicParts }}</p>
             
-            <h4>Shade And Shelter</h4>
+            <h4>Shade and Shelter</h4>
             <p><strong>Plant Height (m):</strong> {{ plant['PlantHeight (m)'] }}</p>
             <p><strong>Shade Provision:</strong> {{ plant.ShadeClass }}</p>
             <p><strong>Shelter Class:</strong> {{ plant.ShelterClass }}</p>
             <p><strong>Canopy Size:</strong> {{ plant.CanopySize }}</p>
 
-            <h4>Bush Bird Habitat</h4>
+            <h4>Native Bird Habitat</h4>
             <p><strong>Food Sources:</strong> {{ plant.SourceQuantity }}</p>
-            <p><strong>Quantity of Nesting Sites:</strong> {{ plant.Level }}</p>
+            <p><strong>Number of Nesting Sites:</strong> {{ plant.Level }}</p>
         </div>
 
         <div class="col-md-1 vertical-divider"></div>

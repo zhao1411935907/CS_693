@@ -13,7 +13,7 @@
             <!-- Search form -->
             <form action="{{ url_for('main.search') }}" method="get">
                 <div class="input-group mb-3">
-                    <input type="text" id="searchQuery" class="form-control" placeholder="Enter Plant's Botanical Name or Common Name" name="searchQuery">
+                    <input type="text" id="searchQuery" class="form-control" placeholder="Enter the plant’s botanical name or common name" name="searchQuery">
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
             </form>
@@ -24,7 +24,7 @@
             {% endif %}
 
             <h1 class="display-5 mb-4">Plant Filter</h1>
-            <p class="mb-4">Please adjust the weight to increase importance of each factor in desired planting selection.</p>
+            <p class="mb-4">Please adjust the weight to reflect the importance of each factor in your plant selection.</p>
 
             <form action="{{ url_for('main.final_scores') }}" method="GET">
 

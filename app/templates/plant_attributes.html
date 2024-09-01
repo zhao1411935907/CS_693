@@ -37,7 +37,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="defoliation_id">Tolerance to Defoliation:</label>
+                        <label for="defoliation_id">Defoliation Tolerance:</label>
                         <select name="defoliation_id" id="defoliation_id" class="form-control">
                             {% for option in defoliation_options %}
                             <option value="{{ option.ID }}" {% if option.ID == attributes.DefoliationID %} selected {% endif %}>
@@ -57,7 +57,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="toxic_id">Quantity of Toxic Elements:</label>
+                        <label for="toxic_id">Toxic Elements Quantity:</label>
                         <select name="toxic_id" id="toxic_id" class="form-control">
                             {% for option in toxic_options %}
                             <option value="{{ option.ID }}" {% if option.ID == attributes.ToxicPartsID %} selected {% endif %}>
@@ -123,7 +123,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="birdnestingsite_id">Bird Nesting Sites:</label>
+                        <label for="birdnestingsite_id">Bird Nesting Areas:</label>
                         <select name="birdnestingsite_id" id="birdnestingsite_id" class="form-control">
                             {% for option in birdnestingsite_options %}
                             <option value="{{ option.ID }}" {% if option.ID == attributes.BirdID %} selected {% endif %}>
@@ -176,7 +176,7 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="sunpreference_id">Sun/Shade:</label>
+                        <label for="sunpreference_id">Sunlight Preference:</label>
                         <select name="sunpreference_id" id="sunpreference_id" class="form-control">
                             {% for option in sunpreference_options %}
                             <option value="{{ option.ID }}" {% if option.ID == attributes.SunPreferencesID %} selected {% endif %}>
@@ -232,7 +232,7 @@
                     <h2>Wetland Score</h2>
                     
                     <div class="mb-3">
-                        <label for="wetland_id">Wetland:</label>
+                        <label for="wetland_id">Wetland Type:</label>
                         <select name="wetland_id" id="wetland_id" class="form-control">
                             {% for option in wetland_options %}
                             <option value="{{ option.ID }}" {% if option.ID == attributes.WetlandID %} selected {% endif %}>

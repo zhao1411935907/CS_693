@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, url_for, request, redirect
+from flask import Blueprint, render_template, url_for, request, redirect, send_file
 from flask import Flask, session
 from flask import Flask, flash
 from datetime import date
@@ -7,6 +7,8 @@ import connect
 from werkzeug.utils import secure_filename
 import os
 from flask import current_app as app
+from io import BytesIO
+import pandas as pd
 
 admin_blueprint = Blueprint('admin', __name__)
 
@@ -105,7 +107,7 @@ def edit_plant(plant_id):
         habitat = request.form['Habitat']
         note = request.form['Note']
         image = request.files['Image']
-
+        is_delete = int(request.form['Visibility'])
         image_filename = None
         if image and allowed_file(image.filename):
             image_filename = secure_filename(image.filename)
@@ -116,19 +118,19 @@ def edit_plant(plant_id):
             # Update image file path in database
             update_query = """
             UPDATE plantdetail
-            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, Image=%s
+            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, Image=%s, is_delete=%s
             WHERE ID=%s
             """
-            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, image_filename, plant_id))
+            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, image_filename, is_delete, plant_id))
         
         else:
             # Update database without changing the image
             update_query = """
             UPDATE plantdetail
-            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s
+            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, is_delete=%s
             WHERE ID=%s
             """
-            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, plant_id))
+            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, is_delete, plant_id))
 
         connection.commit()
         # Redirect back to the plant details page
@@ -520,6 +522,165 @@ def add_plant():
                                 soildrainage_options=soildrainage_options,soildepth_options=soildepth_options, soilmoisture_options=soilmoisture_options,
                                 soiltype_options=soiltype_options, wetland_options=wetland_options, flammability_options=flammability_options
                                 )
+
+
+
+@admin_blueprint.route('/upload_plant_attributes', methods=['POST'])
+def upload_plant_attributes():
+    file = request.files['excelFile']
+    if not file:
+        flash('No file selected.', 'danger')
+        return redirect(url_for('admin.plant_detail'))
+    
+    if not file.filename.endswith(('.xls', '.xlsx')):
+        flash('Invalid file format. Please upload an Excel file with .xls or .xlsx extension.', 'danger')
+        return redirect(url_for('admin.plant_detail'))
+
+    try:
+        df = pd.read_excel(file)
+    except Exception as e:
+        flash(f'Error reading Excel file: {e}', 'danger')
+        return redirect(url_for('admin.plant_detail'))
+
+    required_columns = [
+        'PlantID', 'ConservationScore', 'PalatabilityScore', 'DefoliationScore',
+        'GrowthRateScore', 'ToxicPartsScore', 'HeightScore', 'ShadeScore',
+        'ShelterScore', 'CanopyScore', 'FoodScore', 'BirdScore',
+        'DroughtToleranceScore', 'FrostToleranceScore', 'WindToleranceScore',
+        'SaltToleranceScore', 'SunPreferencesScore', 'SoilDrainageScore',
+        'SoilDepthScore', 'SoilMoistureScore', 'SoilTypeScore',
+        'WetlandTypeScore', 'FlammabilityScore'
+    ]
+
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        flash(f'Missing required columns: {", ".join(missing_columns)}', 'danger')
+        return redirect(url_for('admin.plant_detail'))
+
+    try:
+        df['PlantID'] = df['PlantID'].astype(int)
+        for col in required_columns[1:]:
+            df[col] = df[col].astype(float)
+    except ValueError as e:
+        flash(f'Invalid data format: {e}', 'danger')
+        return redirect(url_for('admin.plant_detail'))
+
+    cursor = getCursor()
+    for _, row in df.iterrows():
+        try:
+            update_query = """
+            UPDATE plantattribute SET
+                ConservationThreatStatus = (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
+                Palatability = (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
+                Defoliation = (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
+                GrowthRate = (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
+                ToxicParts = (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
+                Height = (SELECT ID FROM height WHERE Score = %s LIMIT 1),
+                Shade = (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
+                Shelter = (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
+                Canopy = (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
+                FoodSources = (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
+                BirdNestingSites = (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
+                DroughtTolerance = (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
+                FrostTolerance = (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
+                WindTolerance = (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
+                SaltTolerance = (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
+                SunPreferences = (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
+                SoilDrainage = (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
+                SoilDepth = (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
+                SoilMoisture = (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
+                SoilType = (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
+                Wetland = (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
+                Flammability = (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
+            WHERE PlantID = %s
+            """
+            cursor.execute(update_query, (
+                row['ConservationScore'], row['PalatabilityScore'], row['DefoliationScore'],
+                row['GrowthRateScore'], row['ToxicPartsScore'], row['HeightScore'],
+                row['ShadeScore'], row['ShelterScore'], row['CanopyScore'], row['FoodScore'],
+                row['BirdScore'], row['DroughtToleranceScore'], row['FrostToleranceScore'],
+                row['WindToleranceScore'], row['SaltToleranceScore'], row['SunPreferencesScore'],
+                row['SoilDrainageScore'], row['SoilDepthScore'], row['SoilMoistureScore'],
+                row['SoilTypeScore'], row['WetlandTypeScore'], row['FlammabilityScore'],
+                row['PlantID']
+            ))
+        except Exception as e:
+            flash(f'Error updating plant ID {row["PlantID"]}: {e}', 'danger')
+            return redirect(url_for('admin.plant_detail'))
+
+    connection.commit()
+    flash('Plant attributes have been successfully updated.', 'success')
+    return redirect(url_for('admin.plant_detail'))
+
+
                                
 
-        
+ 
+@admin_blueprint.route('/download_excel')
+def download_excel():
+    cursor = getCursor(dictionary_cursor=True)
+
+    query = """
+    SELECT pa.PlantID, pd.BotanicalName, 
+        ct.Score AS ConservationScore,
+        p.Score AS PalatabilityScore,
+        d.Score AS DefoliationScore,
+        gr.Score AS GrowthRateScore,
+        tp.Score AS ToxicPartsScore,
+        h.Score AS HeightScore,
+        s.Score AS ShadeScore,
+        sl.Score AS ShelterScore,
+        c.Score AS CanopyScore,
+        fs.Score AS FoodScore,
+        bn.Score AS BirdScore,
+        dt.Score AS DroughtToleranceScore,
+        ft.Score AS FrostToleranceScore,
+        wt.Score AS WindToleranceScore,
+        st.Score AS SaltToleranceScore,
+        sp.Score AS SunPreferencesScore,
+        sd.Score AS SoilDrainageScore,
+        sdp.Score AS SoilDepthScore,
+        sm.Score AS SoilMoistureScore,
+        stp.Score AS SoilTypeScore,
+        wl.Score AS WetlandTypeScore,
+        f.Score AS FlammabilityScore
+    FROM plantattribute pa
+    LEFT JOIN conservationthreat ct ON pa.ConservationThreatStatus = ct.ID
+    LEFT JOIN palatability p ON pa.Palatability = p.ID
+    LEFT JOIN defoliation d ON pa.Defoliation = d.ID
+    LEFT JOIN growthrate gr ON pa.GrowthRate = gr.ID
+    LEFT JOIN toxicparts tp ON pa.ToxicParts = tp.ID
+    LEFT JOIN height h ON pa.Height = h.ID
+    LEFT JOIN shade s ON pa.Shade = s.ID
+    LEFT JOIN shelter sl ON pa.Shelter = sl.ID
+    LEFT JOIN canopy c ON pa.Canopy = c.ID
+    LEFT JOIN foodsources fs ON pa.FoodSources = fs.ID
+    LEFT JOIN birdnestingsites bn ON pa.BirdNestingSites = bn.ID
+    LEFT JOIN droughttolerance dt ON pa.DroughtTolerance = dt.ID
+    LEFT JOIN frosttolerance ft ON pa.FrostTolerance = ft.ID
+    LEFT JOIN windtolerance wt ON pa.WindTolerance = wt.ID
+    LEFT JOIN salttolerance st ON pa.SaltTolerance = st.ID
+    LEFT JOIN sunpreference sp ON pa.SunPreferences = sp.ID
+    LEFT JOIN soildrainage sd ON pa.SoilDrainage = sd.ID
+    LEFT JOIN soildepth sdp ON pa.SoilDepth = sdp.ID
+    LEFT JOIN soilmoisture sm ON pa.SoilMoisture = sm.ID
+    LEFT JOIN soiltype stp ON pa.SoilType = stp.ID
+    LEFT JOIN wetland wl ON pa.Wetland = wl.ID
+    LEFT JOIN flammability f ON pa.Flammability = f.ID
+    LEFT JOIN plantdetail pd ON pa.PlantID = pd.ID
+    """
+    cursor.execute(query)
+    plant_attributes = cursor.fetchall()
+
+
+    df = pd.DataFrame(plant_attributes)
+
+
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='PlantAttributes')
+    writer.close()
+    output.seek(0)
+
+
+    return send_file(output, download_name="plant_attributes.xlsx", as_attachment=True)       

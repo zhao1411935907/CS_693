@@ -23,7 +23,7 @@
                     <label for="password">Password <span style="color: red;">*</span></label>
                     <input type="password" class="form-control" id="password" name="password" required>
                     <br>
-                    <input type="checkbox" id="togglePassword"> View Password
+                    <input type="checkbox" id="togglePassword"> Show Password
                     {% if error_message and error_message.password %}
                     <p class="text-danger">{{ error_message.password }}</p>
                     {% endif %}
@@ -33,7 +33,7 @@
             </form>
             
             <!-- Register link -->
-            <p class="mt-3">Don't have an account? <a href="{{ url_for('user.register') }}"><span style="color: red;">Register here</span></a></p>
+            <p class="mt-3">Don't have an account? <a href="{{ url_for('user.register') }}"><span style="color: red;">Don't have an account? Sign up here</span></a></p>
         </div>
     </div>
 </div>

@@ -47,6 +47,17 @@
                     <input type="file" class="form-control" id="Image" name="Image" accept="image/png, image/jpeg, image/jpg">
                 </div>
 
+                <div class="mb-3">
+                    <label for="Visibility" class="form-label">
+                        Visibility:
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Select 'Visible' to show the plant in the list. Select 'Not Visible' to hide it."></i>
+                    </label>
+                    <select class="form-control" id="Visibility" name="Visibility">
+                        <option value="0" {% if plant.is_delete == 0 %}selected{% endif %}>Visible</option>
+                        <option value="1" {% if plant.is_delete == 1 %}selected{% endif %}>Not Visible</option>
+                    </select>
+                </div>              
+
                 <button type="submit" class="btn btn-primary " style="margin-bottom: 30px;">Update Details</button>
             </form>
         </div>

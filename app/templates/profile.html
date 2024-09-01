@@ -21,13 +21,13 @@
                     </table>
                 </div>
 
-                <h5>Personal photo</h5>
+                <h5>Personal Photo</h5>
                 <form action="{{ url_for('user.image') }}" method="post" class="mb-3" autocomplete="off" enctype="multipart/form-data">
                     <div class="col-md-6" style="width: 150px;height:130px;overflow: hidden;border:1px solid #eeee;">
                         {% if account.Image %}
                         <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + account.Image) }}" alt="{{ account.ID }}" class="img-fluid">
                         {% else %}
-                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/update_profile_icon.jpg') }}" alt="No image available" class="img-fluid">
+                        <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/update_profile_icon.jpg') }}" alt="No Image Available" class="img-fluid">
                         {% endif %}
                     </div>
                     <div class="mb-3">
@@ -40,10 +40,10 @@
 
 
 
-                <h5>Change Password</h5>
+                <h5>Change Your Password</h5>
                 <form action="{{ url_for('user.profile') }}" method="post" class="mb-3" autocomplete="off">
                     <div class="mb-3">
-                        <label for="old_password" class="form-label">Old Password</label>
+                        <label for="old_password" class="form-label">Current Password</label>
                         <input type="password" name="old_password" class="form-control" id="old_password" required>
                     </div>
                     <div class="mb-3">
@@ -51,7 +51,7 @@
                         <input type="password" name="new_password" class="form-control" id="new_password" required>
                     </div>
                     <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirm New Password</label>
+                        <label for="confirm_password" class="form-label">Confirm Your New Password</label>
                         <input type="password" name="confirm_password" class="form-control" id="confirm_password" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -59,9 +59,9 @@
 
                 <!-- Navigation Buttons -->
                 {% if session['role'] == 'Admin' %}
-                <a href="/admin_dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/admin_dashboard" class="btn btn-secondary">Return to Dashboard</a>
                 {% elif session['role'] == 'User' %}
-                <a href="/user_dashboard" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="/user_dashboard" class="btn btn-secondary">Return to Dashboard</a>
                 {% endif %}
             </div>
 
