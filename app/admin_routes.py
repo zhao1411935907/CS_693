@@ -87,6 +87,8 @@ def delete_plant(plant_id):
         flash('Plant deleted successfully.', 'success')
     return redirect(url_for('admin.plant_detail'))
 
+
+
 #-----------------------------------------------edit plant details--------------------------------
 @admin_blueprint.route('/edit_plant/<int:plant_id>', methods=['GET', 'POST'])
 def edit_plant(plant_id):
@@ -107,6 +109,7 @@ def edit_plant(plant_id):
         habitat = request.form['Habitat']
         note = request.form['Note']
         image = request.files['Image']
+        image_reference = request.form.get('image_reference', "")
         is_delete = int(request.form['Visibility'])
         image_filename = None
         if image and allowed_file(image.filename):
@@ -114,23 +117,27 @@ def edit_plant(plant_id):
             save_path = os.path.join('static/img', image_filename)
             full_save_path = os.path.join(app.root_path, save_path)
             image.save(full_save_path)
+            if image_reference =="":
+                image_reference = 'Source unknown'
 
             # Update image file path in database
             update_query = """
             UPDATE plantdetail
-            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, Image=%s, is_delete=%s
+            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, Image=%s, is_delete=%s, reference=%s
             WHERE ID=%s
             """
-            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, image_filename, is_delete, plant_id))
+            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, image_filename, is_delete, image_reference, plant_id))
         
         else:
+            if image_reference =="":
+                image_reference = 'Source unknown'            
             # Update database without changing the image
             update_query = """
             UPDATE plantdetail
-            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, is_delete=%s
+            SET BotanicalName=%s, CommonName=%s, Family=%s, Distribution=%s, Habitat=%s, Note=%s, is_delete=%s, reference=%s
             WHERE ID=%s
             """
-            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, is_delete, plant_id))
+            cursor.execute(update_query, (botanical_name, common_name, family, distribution, habitat, note, is_delete, image_reference, plant_id))
 
         connection.commit()
         # Redirect back to the plant details page
@@ -452,6 +459,7 @@ def add_plant():
         note = request.form.get('note', '')
         image = request.files['image']
         image_filename = None
+        image_reference = request.form.get('image_reference', '')
 
         conservation_id = request.form['conservationThreatStatus']
         palatability_id = request.form['palatability']
@@ -482,13 +490,17 @@ def add_plant():
             full_save_path = os.path.join(app.root_path, save_path)
             image.save(full_save_path)
 
+        if image_reference is None:
+            reference = 'Source unknown'
+
+
         try:
             #insert into plantdetail table
             query = """
-            INSERT INTO plantdetail (BotanicalName, CommonName, Family, Distribution, Habitat, Note, Image)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO plantdetail (BotanicalName, CommonName, Family, Distribution, Habitat, Note, Image, reference)
+            VALUES (%s, %s, %s, %s, %s, %s, %s,%s)
             """
-            cursor.execute(query, (botanical_name, common_name, family, distribution, habitat, note, image_filename))
+            cursor.execute(query, (botanical_name, common_name, family, distribution, habitat, note, image_filename, reference))
             plant_id = cursor.lastrowid
 
             # Insert into plantattribute table
@@ -524,163 +536,239 @@ def add_plant():
                                 )
 
 
-
+# upload the file
 @admin_blueprint.route('/upload_plant_attributes', methods=['POST'])
 def upload_plant_attributes():
     file = request.files['excelFile']
     if not file:
-        flash('No file selected.', 'danger')
-        return redirect(url_for('admin.plant_detail'))
-    
-    if not file.filename.endswith(('.xls', '.xlsx')):
-        flash('Invalid file format. Please upload an Excel file with .xls or .xlsx extension.', 'danger')
+        flash('No file selected', 'danger')
         return redirect(url_for('admin.plant_detail'))
 
     try:
+
         df = pd.read_excel(file)
+
+        cursor = getCursor()
+
+        for _, row in df.iterrows():
+            plant_id = row.get('PlantID')
+            botanical_name = row.get('BotanicalName', None)
+            common_name = row.get('CommonName', None)
+            family = row.get('Family', None)
+            distribution = row.get('Distribution', None)
+            habitat = row.get('Habitat', None)
+            note = row.get('Note', None)
+
+            conservation_score = row.get('ConservationThreatScore', 0)
+            palatability_score = row.get('PalatabilityScore', 0)
+            defoliation_score = row.get('DefoliationScore', 0)
+            growthrate_score = row.get('GrowthRateScore', 0)
+            toxicparts_score = row.get('ToxicPartsScore', 0)
+            height_score = row.get('HeightScore', 0)
+            shade_score = row.get('ShadeScore', 0)
+            shelter_score = row.get('ShelterScore', 0)
+            canopy_score = row.get('CanopyScore', 0)
+            foodscore = row.get('FoodSourcesScore', 0)
+            birdscore = row.get('BirdNestingSitesScore', 0)
+            droughttolerance_score = row.get('DroughtToleranceScore', 0)
+            frosttolerance_score = row.get('FrostToleranceScore', 0)
+            windtolerance_score = row.get('WindToleranceScore', 0)
+            salttolerance_score = row.get('SaltToleranceScore', 0)
+            sunpreference_score = row.get('SunPreferencesScore', 0)
+            soildrainage_score = row.get('SoilDrainageScore', 0)
+            soildepth_score = row.get('SoilDepthScore', 0)
+            soilmoisture_score = row.get('SoilMoistureScore', 0)
+            soiltype_score = row.get('SoilTypeScore', 0)
+            wetland_score = row.get('WetlandScore', 0)
+            flammability_score = row.get('FlammabilityScore', 0)
+
+            if plant_id: 
+
+                update_plantdetail = """
+                UPDATE plantdetail SET 
+                    BotanicalName = %s,
+                    CommonName = %s,
+                    Family = %s,
+                    Distribution = %s,
+                    Habitat = %s,
+                    Note = %s
+                WHERE ID = %s
+                """
+                cursor.execute(update_plantdetail, (
+                    botanical_name, common_name, family, distribution, habitat, note, plant_id
+                ))
+
+
+                update_plantattribute = """
+                UPDATE plantattribute SET 
+                    ConservationThreatStatus = (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
+                    Palatability = (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
+                    Defoliation = (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
+                    GrowthRate = (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
+                    ToxicParts = (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
+                    Height = (SELECT ID FROM height WHERE Score = %s LIMIT 1),
+                    Shade = (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
+                    Shelter = (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
+                    Canopy = (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
+                    FoodSources = (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
+                    BirdNestingSites = (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
+                    DroughtTolerance = (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
+                    FrostTolerance = (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
+                    WindTolerance = (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
+                    SaltTolerance = (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
+                    SunPreferences = (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
+                    SoilDrainage = (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
+                    SoilDepth = (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
+                    SoilMoisture = (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
+                    SoilType = (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
+                    Wetland = (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
+                    Flammability = (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
+                WHERE PlantID = %s
+                """
+                cursor.execute(update_plantattribute, (
+                    conservation_score, palatability_score, defoliation_score, growthrate_score,
+                    toxicparts_score, height_score, shade_score, shelter_score, canopy_score,
+                    foodscore, birdscore, droughttolerance_score, frosttolerance_score,
+                    windtolerance_score, salttolerance_score, sunpreference_score,
+                    soildrainage_score, soildepth_score, soilmoisture_score, soiltype_score,
+                    wetland_score, flammability_score, plant_id
+                ))
+
+            else: 
+                insert_plantdetail = """
+                INSERT INTO plantdetail (BotanicalName, CommonName, Family, Distribution, Habitat, Note)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(insert_plantdetail, (botanical_name, common_name, family, distribution, habitat, note))
+                new_plant_id = cursor.lastrowid
+
+                insert_plantattribute = """
+                INSERT INTO plantattribute (PlantID, ConservationThreatStatus, Palatability, Defoliation, GrowthRate, ToxicParts, Height, Shade, Shelter, Canopy, FoodSources, BirdNestingSites, DroughtTolerance, FrostTolerance, WindTolerance, SaltTolerance, SunPreferences, SoilDrainage, SoilDepth, SoilMoisture, SoilType, Wetland, Flammability)
+                VALUES (%s, 
+                    (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM height WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
+                )
+                """
+                cursor.execute(insert_plantattribute, (
+                    new_plant_id, conservation_score, palatability_score, defoliation_score, growthrate_score,
+                    toxicparts_score, height_score, shade_score, shelter_score, canopy_score,
+                    foodscore, birdscore, droughttolerance_score, frosttolerance_score,
+                    windtolerance_score, salttolerance_score, sunpreference_score,
+                    soildrainage_score, soildepth_score, soilmoisture_score, soiltype_score,
+                    wetland_score, flammability_score
+                ))
+
+        connection.commit()
+        flash('Plant attributes updated successfully!', 'success')
+        return redirect(url_for('admin.plant_detail'))
+
     except Exception as e:
-        flash(f'Error reading Excel file: {e}', 'danger')
+        if "Duplicate entry" in str(e):
+            flash("Error: Duplicate plant entry. Please ensure unique PlantID.", 'danger')
+        elif "Subquery returns more than 1 row" in str(e):
+            flash("Error: Duplicate attribute scores found for one or more plant attributes. Please ensure unique scores.", 'danger')
+        else:
+            flash(f"Error uploading plant attributes: {str(e)}", 'danger')
         return redirect(url_for('admin.plant_detail'))
-
-    required_columns = [
-        'PlantID', 'ConservationScore', 'PalatabilityScore', 'DefoliationScore',
-        'GrowthRateScore', 'ToxicPartsScore', 'HeightScore', 'ShadeScore',
-        'ShelterScore', 'CanopyScore', 'FoodScore', 'BirdScore',
-        'DroughtToleranceScore', 'FrostToleranceScore', 'WindToleranceScore',
-        'SaltToleranceScore', 'SunPreferencesScore', 'SoilDrainageScore',
-        'SoilDepthScore', 'SoilMoistureScore', 'SoilTypeScore',
-        'WetlandTypeScore', 'FlammabilityScore'
-    ]
-
-    missing_columns = [col for col in required_columns if col not in df.columns]
-    if missing_columns:
-        flash(f'Missing required columns: {", ".join(missing_columns)}', 'danger')
-        return redirect(url_for('admin.plant_detail'))
-
-    try:
-        df['PlantID'] = df['PlantID'].astype(int)
-        for col in required_columns[1:]:
-            df[col] = df[col].astype(float)
-    except ValueError as e:
-        flash(f'Invalid data format: {e}', 'danger')
-        return redirect(url_for('admin.plant_detail'))
-
-    cursor = getCursor()
-    for _, row in df.iterrows():
-        try:
-            update_query = """
-            UPDATE plantattribute SET
-                ConservationThreatStatus = (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
-                Palatability = (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
-                Defoliation = (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
-                GrowthRate = (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
-                ToxicParts = (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
-                Height = (SELECT ID FROM height WHERE Score = %s LIMIT 1),
-                Shade = (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
-                Shelter = (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
-                Canopy = (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
-                FoodSources = (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
-                BirdNestingSites = (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
-                DroughtTolerance = (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
-                FrostTolerance = (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
-                WindTolerance = (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
-                SaltTolerance = (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
-                SunPreferences = (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
-                SoilDrainage = (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
-                SoilDepth = (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
-                SoilMoisture = (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
-                SoilType = (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
-                Wetland = (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
-                Flammability = (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
-            WHERE PlantID = %s
-            """
-            cursor.execute(update_query, (
-                row['ConservationScore'], row['PalatabilityScore'], row['DefoliationScore'],
-                row['GrowthRateScore'], row['ToxicPartsScore'], row['HeightScore'],
-                row['ShadeScore'], row['ShelterScore'], row['CanopyScore'], row['FoodScore'],
-                row['BirdScore'], row['DroughtToleranceScore'], row['FrostToleranceScore'],
-                row['WindToleranceScore'], row['SaltToleranceScore'], row['SunPreferencesScore'],
-                row['SoilDrainageScore'], row['SoilDepthScore'], row['SoilMoistureScore'],
-                row['SoilTypeScore'], row['WetlandTypeScore'], row['FlammabilityScore'],
-                row['PlantID']
-            ))
-        except Exception as e:
-            flash(f'Error updating plant ID {row["PlantID"]}: {e}', 'danger')
-            return redirect(url_for('admin.plant_detail'))
-
-    connection.commit()
-    flash('Plant attributes have been successfully updated.', 'success')
-    return redirect(url_for('admin.plant_detail'))
 
 
                                
 
  
-@admin_blueprint.route('/download_excel')
+@admin_blueprint.route('/download_excel', methods=['GET'])
 def download_excel():
-    cursor = getCursor(dictionary_cursor=True)
-
-    query = """
-    SELECT pa.PlantID, pd.BotanicalName, 
-        ct.Score AS ConservationScore,
-        p.Score AS PalatabilityScore,
-        d.Score AS DefoliationScore,
-        gr.Score AS GrowthRateScore,
-        tp.Score AS ToxicPartsScore,
-        h.Score AS HeightScore,
-        s.Score AS ShadeScore,
-        sl.Score AS ShelterScore,
-        c.Score AS CanopyScore,
-        fs.Score AS FoodScore,
-        bn.Score AS BirdScore,
-        dt.Score AS DroughtToleranceScore,
-        ft.Score AS FrostToleranceScore,
-        wt.Score AS WindToleranceScore,
-        st.Score AS SaltToleranceScore,
-        sp.Score AS SunPreferencesScore,
-        sd.Score AS SoilDrainageScore,
-        sdp.Score AS SoilDepthScore,
-        sm.Score AS SoilMoistureScore,
-        stp.Score AS SoilTypeScore,
-        wl.Score AS WetlandTypeScore,
-        f.Score AS FlammabilityScore
-    FROM plantattribute pa
-    LEFT JOIN conservationthreat ct ON pa.ConservationThreatStatus = ct.ID
-    LEFT JOIN palatability p ON pa.Palatability = p.ID
-    LEFT JOIN defoliation d ON pa.Defoliation = d.ID
-    LEFT JOIN growthrate gr ON pa.GrowthRate = gr.ID
-    LEFT JOIN toxicparts tp ON pa.ToxicParts = tp.ID
-    LEFT JOIN height h ON pa.Height = h.ID
-    LEFT JOIN shade s ON pa.Shade = s.ID
-    LEFT JOIN shelter sl ON pa.Shelter = sl.ID
-    LEFT JOIN canopy c ON pa.Canopy = c.ID
-    LEFT JOIN foodsources fs ON pa.FoodSources = fs.ID
-    LEFT JOIN birdnestingsites bn ON pa.BirdNestingSites = bn.ID
-    LEFT JOIN droughttolerance dt ON pa.DroughtTolerance = dt.ID
-    LEFT JOIN frosttolerance ft ON pa.FrostTolerance = ft.ID
-    LEFT JOIN windtolerance wt ON pa.WindTolerance = wt.ID
-    LEFT JOIN salttolerance st ON pa.SaltTolerance = st.ID
-    LEFT JOIN sunpreference sp ON pa.SunPreferences = sp.ID
-    LEFT JOIN soildrainage sd ON pa.SoilDrainage = sd.ID
-    LEFT JOIN soildepth sdp ON pa.SoilDepth = sdp.ID
-    LEFT JOIN soilmoisture sm ON pa.SoilMoisture = sm.ID
-    LEFT JOIN soiltype stp ON pa.SoilType = stp.ID
-    LEFT JOIN wetland wl ON pa.Wetland = wl.ID
-    LEFT JOIN flammability f ON pa.Flammability = f.ID
-    LEFT JOIN plantdetail pd ON pa.PlantID = pd.ID
-    """
-    cursor.execute(query)
-    plant_attributes = cursor.fetchall()
+    try:
+        cursor = getCursor(dictionary_cursor=True)
 
 
-    df = pd.DataFrame(plant_attributes)
+        query = """
+        SELECT pd.ID as PlantID, pd.BotanicalName, pd.CommonName, pd.Family, pd.Distribution, pd.Habitat, pd.Note,
+               pa.ConservationThreatStatus, ct.Score as ConservationThreatScore, 
+               pa.Palatability, p.Score as PalatabilityScore, 
+               pa.Defoliation, d.Score as DefoliationScore, 
+               pa.GrowthRate, gr.Score as GrowthRateScore,
+               pa.ToxicParts, tp.Score as ToxicPartsScore,
+               pa.Height, h.Score as HeightScore,
+               pa.Shade, s.Score as ShadeScore,
+               pa.Shelter, sl.Score as ShelterScore,
+               pa.Canopy, c.Score as CanopyScore,
+               pa.FoodSources, fs.Score as FoodSourcesScore,
+               pa.BirdNestingSites, bn.Score as BirdNestingSitesScore,
+               pa.DroughtTolerance, dt.Score as DroughtToleranceScore,
+               pa.FrostTolerance, ft.Score as FrostToleranceScore,
+               pa.WindTolerance, wt.Score as WindToleranceScore,
+               pa.SaltTolerance, st.Score as SaltToleranceScore,
+               pa.SunPreferences, sp.Score as SunPreferencesScore,
+               pa.SoilDrainage, sd.Score as SoilDrainageScore,
+               pa.SoilDepth, sdp.Score as SoilDepthScore,
+               pa.SoilMoisture, sm.Score as SoilMoistureScore,
+               pa.SoilType, stp.Score as SoilTypeScore,
+               pa.Wetland, wl.Score as WetlandScore,
+               pa.Flammability, f.Score as FlammabilityScore
+        FROM plantdetail pd
+        LEFT JOIN plantattribute pa ON pd.ID = pa.PlantID
+        LEFT JOIN conservationthreat ct ON pa.ConservationThreatStatus = ct.ID
+        LEFT JOIN palatability p ON pa.Palatability = p.ID
+        LEFT JOIN defoliation d ON pa.Defoliation = d.ID
+        LEFT JOIN growthrate gr ON pa.GrowthRate = gr.ID
+        LEFT JOIN toxicparts tp ON pa.ToxicParts = tp.ID
+        LEFT JOIN height h ON pa.Height = h.ID
+        LEFT JOIN shade s ON pa.Shade = s.ID
+        LEFT JOIN shelter sl ON pa.Shelter = sl.ID
+        LEFT JOIN canopy c ON pa.Canopy = c.ID
+        LEFT JOIN foodsources fs ON pa.FoodSources = fs.ID
+        LEFT JOIN birdnestingsites bn ON pa.BirdNestingSites = bn.ID
+        LEFT JOIN droughttolerance dt ON pa.DroughtTolerance = dt.ID
+        LEFT JOIN frosttolerance ft ON pa.FrostTolerance = ft.ID
+        LEFT JOIN windtolerance wt ON pa.WindTolerance = wt.ID
+        LEFT JOIN salttolerance st ON pa.SaltTolerance = st.ID
+        LEFT JOIN sunpreference sp ON pa.SunPreferences = sp.ID
+        LEFT JOIN soildrainage sd ON pa.SoilDrainage = sd.ID
+        LEFT JOIN soildepth sdp ON pa.SoilDepth = sdp.ID
+        LEFT JOIN soilmoisture sm ON pa.SoilMoisture = sm.ID
+        LEFT JOIN soiltype stp ON pa.SoilType = stp.ID
+        LEFT JOIN wetland wl ON pa.Wetland = wl.ID
+        LEFT JOIN flammability f ON pa.Flammability = f.ID
+        """
+        cursor.execute(query)
+        plant_data = cursor.fetchall()
 
 
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df.to_excel(writer, index=False, sheet_name='PlantAttributes')
-    writer.close()
-    output.seek(0)
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
 
 
-    return send_file(output, download_name="plant_attributes.xlsx", as_attachment=True)       
+        df = pd.DataFrame(plant_data)
+        df.to_excel(writer, index=False, sheet_name='Plant Attributes')
+
+        writer.close()
+
+        output.seek(0)
+
+
+        return send_file(output, download_name="plant_attributes.xlsx", as_attachment=True)
+
+    except Exception as e:
+        flash(f"Error downloading plant attributes: {str(e)}", 'danger')
+        return redirect(url_for('admin.plant_detail'))
+ 

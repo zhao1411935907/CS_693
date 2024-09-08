@@ -333,7 +333,7 @@ def favorite_plants_view():
         SELECT plantdetail.ID, plantdetail.BotanicalName, plantdetail.CommonName, plantdetail.Family, plantdetail.Image
         FROM plantdetail
         JOIN favorite ON plantdetail.ID = favorite.Plant
-        WHERE favorite.User = %s
+        WHERE favorite.User = %s AND plantdetail.is_delete=0
     '''
     cursor.execute(query, (user_id,))
     favorites = cursor.fetchall()

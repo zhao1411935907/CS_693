@@ -13,6 +13,27 @@
     border-left: 1px solid #ddd;
     height: auto;
   }
+  .image-container {
+    width: 500px;
+    height: 350px;
+    overflow: hidden;
+    border: 1px solid #eeee;
+    margin-right: 100px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .image-container img {
+    width: 100%;
+    height: auto;
+  }
+  .image-source {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 5px;
+    text-align: center;
+  }
   .btn-heart {
     position: relative;
   }
@@ -54,14 +75,19 @@
     <br>
     <br>
     <div class="row">
-        <div class="col-md-6" style="width: 500px;height:350px;overflow: hidden;border:1px solid #eeee; margin-right: 100px; margin-bottom: 50px;">
-            {% if plant.Image %}
-                <img style="width: 100%;height:auto;" src="{{ url_for('static', filename='img/' + plant.Image) }}" alt="{{ plant.BotanicalName }}" class="img-fluid">
-            {% else %}
-                <img style="width: 100%;height: auto;" src="{{ url_for('static', filename='img/no_img_available.jpg') }}" alt="No image available" class="img-fluid">
-            {% endif %}
+        <div class="col-md-6">
+            <div class="image-container" style="width: 500px; height:350px; overflow: hidden; border:1px solid #eeee; margin-right: 100px;">
+                {% if plant.Image %}
+                    <img src="{{ url_for('static', filename='img/' + plant.Image) }}" alt="{{ plant.BotanicalName }}" class="img-fluid">
+                {% else %}
+                    <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" alt="No image available" class="img-fluid">
+                {% endif %}
+            </div>
+
+            <div class="image-source">{{ plant.reference }}<span style="color: red;">*</span></div>
         </div>
-        <div class="col-md-6" >
+        
+        <div class="col-md-6">
             <!-- Plant Details Section -->
             <h2>
                 {{ plant.BotanicalName }}
@@ -155,8 +181,9 @@
         });
     }  
 </script>
-  
+
 {% endblock %}
+
 <html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>

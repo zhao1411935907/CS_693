@@ -3,26 +3,46 @@
 {% block title %}Filter Results{% endblock %}
 
 {% block content %}
-<div class="container-xxl py-5">
-  <div class="container">
+
+
     {% if from_search %}
         <h1 class="display-5 mb-4">Search Results</h1>
         <h5 class="display-5 mb-4">The following plants match your search criteria</h5>
     {% else %}
+<div class="container-xxl py-5">
+  <div class="container">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Your Filter Criteria</h5>
+        <button id="saveFilterBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#saveFilterModal">Save Filter</button>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          {% for category, weight in weight_dict.items() %}
+          <div class="col-md-4 mb-3">
+            <strong>{{ category }}:</strong> {{ weight }}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
       <h1 class="display-5 mb-4">Filter Results</h1>
       <h5 class="display-5 mb-4">The top 20 plants that best match your filtering criteria</h5>
     {% endif %}
-      <div class="row row-cols-1 row-cols-md-3 g-4">
-          {% for plant in detailed_plants %}
-              <div class="col">
-                <a href="{{ url_for('main.plant_detail', plant_id=plant.ID) }}" class="text-decoration-none text-dark">
-                  <div class="card h-100 card-hover">
-                      {% if plant.Image %}
-                          <img src="{{ url_for('static', filename='img/' + plant.Image) }}" class="card-img-top" alt="{{ plant.BotanicalName }}" style="height: 200px; object-fit: cover;">
-                      {% else %}
-                          <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" class="card-img-top" alt="No image available" style="height: 200px; object-fit: cover;">
-                      {% endif %}
-                      <div class="card-body">
+    <div class="row row-cols-1 row-cols-md-3 g-5">
+      {% for plant in detailed_plants %}
+          <div class="col">
+              <!-- Entire card clickable for plant detail -->
+              <a href="{{ url_for('main.plant_detail', plant_id=plant.ID) }}" class="text-decoration-none text-dark">
+                <div class="card h-100 d-flex flex-column justify-content-between" style="position: relative;">
+                    {% if plant.Image %}
+                        <img src="{{ url_for('static', filename='img/' + plant.Image) }}" class="card-img-top" alt="{{ plant.BotanicalName }}" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" class="card-img-top" alt="No image available" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body" style="display: flex; justify-content: space-between;">
+                      <div class="text-content">
                         {% if not from_search %}
                           <h5 class="card-title">No.{{ loop.index }} {{ plant.BotanicalName }}</h5>
                         {% else %}
@@ -31,15 +51,107 @@
                           <p class="card-text">{{ plant.CommonName }}</p>
                           <p class="card-text"><small class="text-muted">Family: {{ plant.Family }}</small></p>
                       </div>
-                  </div>
-                </a>
+    
+                      <!-- Only show progress circle and details button when not from_search -->
+                      {% if not from_search %}
+                      <div class="progress-circle" data-percentage="{{ plant.Percentage|round(2) }}">
+                        <div class="circle">
+                          <div class="inset">
+                            <span>{{ plant.Percentage|round(2) }}%</span>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+                    </div>
+                </div>
+              </a>
+    
+              <!-- Only show the button if not from_search -->
+              {% if not from_search %}
+              <div class="mt-0">
+                  <button class="btn btn-info btn-sm w-100" data-bs-toggle="modal" data-bs-target="#calculationModal{{ plant.ID }}">View Calculation Details</button>
               </div>
-          {% endfor %}
+              {% endif %}
+          </div>
+    
+          <!-- Modal for displaying calculation details -->
+          <div class="modal fade" id="calculationModal{{ plant.ID }}" tabindex="-1" aria-labelledby="calculationModalLabel{{ plant.ID }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="calculationModalLabel{{ plant.ID }}">Calculation Details for {{ plant.BotanicalName }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  {% if not from_search %}
+                  <p><strong>Calculation Details:</strong></p>
+                  <p>Total Score: {{ plant.Score }}</p>
+                  <p>Maximum Possible Score: {{ plant.max_scores }}</p>
+                  <p>Final Percentage: {{ plant.Percentage|round(2) }}%</p>
+    
+                  <hr>
+                  {% endif %}
+                  <!-- Detailed explanation of the calculation -->
+                  <p>The percentage shown represents how closely this plant matches the criteria you have set. Here's how the calculation works:</p>
+                  
+                  <h6>1. Total Score:</h6>
+                  <p>The total score of this plant is calculated by considering different attributes such as palatability, growth rate, conservation threat status, and more. For each attribute, the plant is given a score based on its characteristics. This score is then adjusted according to the importance (weight) you assigned to that attribute during filtering. The higher the attribute's weight, the more it contributes to the plant's total score.</p>
+                  
+                  <h6>2. Maximum Possible Score:</h6>
+                  <p>The maximum possible score is the theoretical highest score this plant could achieve if it performed perfectly across all attributes. This is calculated by multiplying the maximum possible value for each attribute by the corresponding weight. This gives us a benchmark for what an ideal plant would score based on your criteria.</p>
+    
+                  <h6>3. Final Percentage:</h6>
+                  <p>The final percentage is calculated by dividing the plant's total score by the maximum possible score, and then multiplying the result by 100 to convert it into a percentage. This percentage tells you how well the plant matches your filter settings in comparison to the best possible plant.</p>
+                  
+                  <p>For example, if a plant's total score is 75 and the maximum possible score is 100, the plant's percentage match would be 75%. This means the plant meets 75% of the criteria you have set based on the weights and attributes considered.</p>
+    
+                  <p>This helps you compare how well different plants align with your preferences and select the one that fits best.</p>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+    
+      {% endfor %}
+    </div>    
+</div>
+</div>
+
+<!-- Save Filter Modal -->
+<div class="modal fade" id="saveFilterModal" tabindex="-1" aria-labelledby="saveFilterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="saveFilterModalLabel">Save Filter Criteria</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <div class="modal-body">
+        <form id="saveFilterForm">
+          <div class="mb-3">
+            <label for="filterName" class="form-label">Filter Name</label>
+            <input type="text" class="form-control" id="filterName" placeholder="Enter a name for your filter">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveFilterAction">Save</button>
+      </div>
+    </div>
   </div>
 </div>
 
-{% endblock %}<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
+<script>
+document.querySelectorAll('.progress-circle').forEach(function(circle) {
+  const percentage = circle.getAttribute('data-percentage');
+  circle.style.setProperty('--percentage', percentage);
+});
+</script>
+
+{% endblock %}
+<html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>
 <!--[if gte mso 9]><xml>
 <mso:CustomDocumentProperties>
 <mso:xd_Signature msdt:dt="string"></mso:xd_Signature>
