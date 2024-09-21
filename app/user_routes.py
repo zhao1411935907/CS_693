@@ -340,3 +340,122 @@ def favorite_plants_view():
     cursor.close()
 
     return render_template('favorites.html', favorites=favorites)
+
+
+@user_blueprint.route('/save_filter', methods=['POST'])
+def save_filter():
+    data = request.get_json()
+    filter_name = data.get('filterName')
+    weight_dict = data.get('weightDict')
+    user_id = session.get('ID')  
+    if not filter_name or not user_id:
+        return jsonify({'success': False, 'message': 'Filter name or user ID is missing.'})
+
+    try:
+        cursor = getCursor()
+        check_query = """
+            SELECT COUNT(*) FROM filter_result WHERE filter_name = %s AND UserID = %s
+        """
+        cursor.execute(check_query, (filter_name, user_id))
+        result = cursor.fetchone()
+
+        if result[0] > 0:
+            return jsonify({'success': False, 'message': 'Filter name already exists. Please choose a different name.'})
+
+
+        query = """
+            INSERT INTO filter_result (UserID, filter_name, BirdNestingSitesScore, ConservationThreatScore, PalatabilityScore, 
+                                        DefoliationScore, GrowthRateScore, ToxicPartsScore, HeightScore, ShadeScore, 
+                                        ShelterScore, CanopyScore, FoodSourcesScore, DroughtToleranceScore, FrostToleranceScore, 
+                                        WindToleranceScore, SaltToleranceScore, SunPreferencesScore, SoilDrainageScore, SoilDepthScore, 
+                                        SoilMoistureScore, SoilTypeScore, WetlandScore, FlammabilityScore, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+        """
+
+        values = (
+            user_id,
+            filter_name,
+            weight_dict.get('Bird'),
+            weight_dict.get('Conservation Threat'),
+            weight_dict.get('Palatability'),
+            weight_dict.get('Defoliation'),
+            weight_dict.get('Growth Rate'),
+            weight_dict.get('Toxic Elements'),
+            weight_dict.get('Height'),
+            weight_dict.get('Shade'),
+            weight_dict.get('Shelter'),
+            weight_dict.get('Canopy'),
+            weight_dict.get('Food Sources'),
+            weight_dict.get('Drought Tolerance'),
+            weight_dict.get('Frost Tolerance'),
+            weight_dict.get('Wind Tolerance'),
+            weight_dict.get('Salt Tolerance'),
+            weight_dict.get('Sun/Shade'),
+            weight_dict.get('Soil Drainage'),
+            weight_dict.get('Soil Depth'),
+            weight_dict.get('Soil Moisture'),
+            weight_dict.get('Soil Type'),
+            weight_dict.get('Wetland'),
+            weight_dict.get('Flammability')
+        )
+
+        cursor.execute(query, values)
+        connection.commit()
+
+        return jsonify({'success': True})
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+    finally:
+        cursor.close()
+
+
+
+
+# Route to display filter results
+@user_blueprint.route('/filter_results')
+def filter_results():
+    cursor = getCursor(dictionary_cursor=True)
+    cursor.execute("SELECT id, filter_name, created_at FROM filter_result WHERE UserID = %s", (session['ID'],))
+    saved_filters = cursor.fetchall()
+    return render_template('filter_results.html', saved_filters=saved_filters)
+
+# Route to rename a filter
+@user_blueprint.route('/rename_filter/<int:filter_id>', methods=['POST'])
+def rename_filter(filter_id):
+    new_name = request.form['new_filter_name']
+    
+    # Check if the name already exists
+    cursor = getCursor()
+    cursor.execute("SELECT COUNT(*) FROM filter_result WHERE filter_name = %s AND UserID = %s", (new_name, session['ID']))
+    existing_name_count = cursor.fetchone()[0]
+
+    if existing_name_count > 0:
+        flash('Filter name already exists. Please choose another name.', 'danger')
+    else:
+        cursor.execute("UPDATE filter_result SET filter_name = %s WHERE ID = %s AND UserID = %s", (new_name, filter_id, session['ID']))
+        flash('Filter name updated successfully!', 'success')
+
+    return redirect(url_for('user.filter_results'))
+
+# Route to delete a filter (AJAX call)
+@user_blueprint.route('/delete_filter/<int:filter_id>', methods=['DELETE'])
+def delete_filter(filter_id):
+    cursor = getCursor()
+    cursor.execute("DELETE FROM filter_result WHERE ID = %s AND UserID = %s", (filter_id, session['ID']))
+    return jsonify({'status': 'success'})
+
+
+@user_blueprint.route('/start_filter/<int:filter_id>', methods=['GET'])
+def start_filter(filter_id):
+    cursor = getCursor(dictionary_cursor=True)
+    cursor.execute("SELECT * FROM filter_result WHERE ID = %s", (filter_id,))
+    filter_data = cursor.fetchone()
+    cursor.close()
+
+    if filter_data:
+        return render_template('index.html', filter=filter_data)
+    else:
+        flash('Filter not found', 'danger')
+        return redirect(url_for('user.filter_results'))

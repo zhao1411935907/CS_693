@@ -765,3 +765,36 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2024-05-07 22:02:44
+
+DROP TABLE IF EXISTS `filter_result`;
+CREATE TABLE `filter_result` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `filter_name` varchar(255) NOT NULL,
+  `UserID` int NOT NULL, 
+  `ConservationThreatScore` int NOT NULL,
+  `PalatabilityScore` int NOT NULL,
+  `DefoliationScore` int NOT NULL,
+  `GrowthRateScore` int NOT NULL,
+  `ToxicPartsScore` int NOT NULL,
+  `HeightScore` int NOT NULL,
+  `ShadeScore` int NOT NULL,
+  `ShelterScore` int NOT NULL,
+  `CanopyScore` int NOT NULL,
+  `FoodSourcesScore` int NOT NULL,
+  `BirdNestingSitesScore` int NOT NULL,
+  `DroughtToleranceScore` int NOT NULL,
+  `FrostToleranceScore` int NOT NULL,
+  `WindToleranceScore` int NOT NULL,
+  `SaltToleranceScore` int NOT NULL,
+  `SunPreferencesScore` int NOT NULL,
+  `SoilDrainageScore` int NOT NULL,
+  `SoilDepthScore` int NOT NULL,
+  `SoilMoistureScore` int NOT NULL,
+  `SoilTypeScore` int NOT NULL,
+  `WetlandScore` int NOT NULL,
+  `FlammabilityScore` int NOT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ID`),
+  FOREIGN KEY (`UserID`) REFERENCES `user` (`ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+

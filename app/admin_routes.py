@@ -559,29 +559,43 @@ def upload_plant_attributes():
             habitat = row.get('Habitat', None)
             note = row.get('Note', None)
 
-            conservation_score = row.get('ConservationThreatScore', 0)
-            palatability_score = row.get('PalatabilityScore', 0)
-            defoliation_score = row.get('DefoliationScore', 0)
-            growthrate_score = row.get('GrowthRateScore', 0)
-            toxicparts_score = row.get('ToxicPartsScore', 0)
-            height_score = row.get('HeightScore', 0)
-            shade_score = row.get('ShadeScore', 0)
-            shelter_score = row.get('ShelterScore', 0)
-            canopy_score = row.get('CanopyScore', 0)
-            foodscore = row.get('FoodSourcesScore', 0)
-            birdscore = row.get('BirdNestingSitesScore', 0)
-            droughttolerance_score = row.get('DroughtToleranceScore', 0)
-            frosttolerance_score = row.get('FrostToleranceScore', 0)
-            windtolerance_score = row.get('WindToleranceScore', 0)
-            salttolerance_score = row.get('SaltToleranceScore', 0)
-            sunpreference_score = row.get('SunPreferencesScore', 0)
-            soildrainage_score = row.get('SoilDrainageScore', 0)
-            soildepth_score = row.get('SoilDepthScore', 0)
-            soilmoisture_score = row.get('SoilMoistureScore', 0)
-            soiltype_score = row.get('SoilTypeScore', 0)
-            wetland_score = row.get('WetlandScore', 0)
-            flammability_score = row.get('FlammabilityScore', 0)
-
+            conservation_score = row.get('ConservationThreatStatus')
+            palatability_score = row.get('Palatability')
+            defoliation_score = row.get('ToleranceToDefoliation')
+            growthrate_score = row.get('GrowthRate')
+            toxicparts_score = row.get('ToxicParts')
+            height_score = row.get('PlantHeight (m)')
+            shade_score = str(row.get('ShadeClass'))
+            if shade_score == "nan":
+                shade_score = "None"  
+            else:
+                shade_score = shade_score or None           
+            shelter_score = str(row.get('ShelterClass'))
+            if shelter_score == "nan":
+                shelter_score = "None"  
+            else:
+                shelter_score = shelter_score or None              
+            canopy_score = str(row.get('CanopySize'))
+            if canopy_score == "nan":
+                canopy_score = "None"  
+            else:
+                canopy_score = canopy_score or None             
+            foodscore = row.get('SourceQuantity')
+            birdscore = row.get('BirdNestingSites')
+            droughttolerance_score = row.get('DroughtTolerance')
+            frosttolerance_score = row.get('FrostTolerance')
+            windtolerance_score = row.get('WindTolerance')
+            salttolerance_score = row.get('SaltTolerance')
+            sunpreference_score = row.get('SunPreferences')
+            soildrainage_score = row.get('SoilDrainage')
+            soildepth_score = row.get('SoilDepth')
+            soilmoisture_score = row.get('SoilMoisture')
+            soiltype_score = row.get('SoilType')
+            wetland_score = row.get('WetlandType')
+            flammability_score = row.get('Flammability')
+            print(f"Shade Score: {shade_score}")
+            query_to_print = f"(SELECT ID FROM shade WHERE ShadeClass = '{shade_score}' LIMIT 1)"
+            print(f"Shade Query: {query_to_print}")
             if plant_id: 
 
                 update_plantdetail = """
@@ -601,28 +615,28 @@ def upload_plant_attributes():
 
                 update_plantattribute = """
                 UPDATE plantattribute SET 
-                    ConservationThreatStatus = (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
-                    Palatability = (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
-                    Defoliation = (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
-                    GrowthRate = (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
-                    ToxicParts = (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
-                    Height = (SELECT ID FROM height WHERE Score = %s LIMIT 1),
-                    Shade = (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
-                    Shelter = (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
-                    Canopy = (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
-                    FoodSources = (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
-                    BirdNestingSites = (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
-                    DroughtTolerance = (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
-                    FrostTolerance = (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
-                    WindTolerance = (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
-                    SaltTolerance = (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
-                    SunPreferences = (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
-                    SoilDrainage = (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
-                    SoilDepth = (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
-                    SoilMoisture = (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
-                    SoilType = (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
-                    Wetland = (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
-                    Flammability = (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
+                    ConservationThreatStatus = (SELECT ID FROM conservationthreat WHERE ConservationThreatStatus = %s LIMIT 1),
+                    Palatability = (SELECT ID FROM palatability WHERE Level = %s LIMIT 1),
+                    Defoliation = (SELECT ID FROM defoliation WHERE ToleranceToDefoliation = %s LIMIT 1),
+                    GrowthRate = (SELECT ID FROM growthrate WHERE GrowthRate = %s LIMIT 1),
+                    ToxicParts = (SELECT ID FROM toxicparts WHERE ToxicParts = %s LIMIT 1),
+                    Height = (SELECT ID FROM height WHERE `PlantHeight (m)` = %s LIMIT 1),
+                    Shade = (SELECT ID FROM shade WHERE ShadeClass = %s LIMIT 1),
+                    Shelter = (SELECT ID FROM shelter WHERE ShelterClass = %s LIMIT 1),
+                    Canopy = (SELECT ID FROM canopy WHERE CanopySize = %s LIMIT 1),
+                    FoodSources = (SELECT ID FROM foodsources WHERE SourceQuantity = %s LIMIT 1),
+                    BirdNestingSites = (SELECT ID FROM birdnestingsites WHERE Level = %s LIMIT 1),
+                    DroughtTolerance = (SELECT ID FROM droughttolerance WHERE DroughtTolerance = %s LIMIT 1),
+                    FrostTolerance = (SELECT ID FROM frosttolerance WHERE FrostTolerance = %s LIMIT 1),
+                    WindTolerance = (SELECT ID FROM windtolerance WHERE WindTolerance = %s LIMIT 1),
+                    SaltTolerance = (SELECT ID FROM salttolerance WHERE SaltTolerance = %s LIMIT 1),
+                    SunPreferences = (SELECT ID FROM sunpreference WHERE SunPreferences = %s LIMIT 1),
+                    SoilDrainage = (SELECT ID FROM soildrainage WHERE SoilDrainage = %s LIMIT 1),
+                    SoilDepth = (SELECT ID FROM soildepth WHERE SoilDepth = %s LIMIT 1),
+                    SoilMoisture = (SELECT ID FROM soilmoisture WHERE SoilMoisture = %s LIMIT 1),
+                    SoilType = (SELECT ID FROM soiltype WHERE SoilType = %s LIMIT 1),
+                    Wetland = (SELECT ID FROM wetland WHERE WetlandType = %s LIMIT 1),
+                    Flammability = (SELECT ID FROM flammability WHERE Flammability = %s LIMIT 1)
                 WHERE PlantID = %s
                 """
                 cursor.execute(update_plantattribute, (
@@ -645,28 +659,28 @@ def upload_plant_attributes():
                 insert_plantattribute = """
                 INSERT INTO plantattribute (PlantID, ConservationThreatStatus, Palatability, Defoliation, GrowthRate, ToxicParts, Height, Shade, Shelter, Canopy, FoodSources, BirdNestingSites, DroughtTolerance, FrostTolerance, WindTolerance, SaltTolerance, SunPreferences, SoilDrainage, SoilDepth, SoilMoisture, SoilType, Wetland, Flammability)
                 VALUES (%s, 
-                    (SELECT ID FROM conservationthreat WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM palatability WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM defoliation WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM growthrate WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM toxicparts WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM height WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM shade WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM shelter WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM canopy WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM foodsources WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM birdnestingsites WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM droughttolerance WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM frosttolerance WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM windtolerance WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM salttolerance WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM sunpreference WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM soildrainage WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM soildepth WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM soilmoisture WHERE Score = %s LIMIT 1),
+                    (SELECT ID FROM conservationthreat WHERE ConservationThreatStatus = %s LIMIT 1),
+                    (SELECT ID FROM palatability WHERE Level = %s LIMIT 1),
+                    (SELECT ID FROM defoliation WHERE ToleranceToDefoliation = %s LIMIT 1),
+                    (SELECT ID FROM growthrate WHERE GrowthRate = %s LIMIT 1),
+                    (SELECT ID FROM toxicparts WHERE ToxicParts = %s LIMIT 1),
+                    (SELECT ID FROM height WHERE `PlantHeight (m)` = %s LIMIT 1),
+                    (SELECT ID FROM shade WHERE ShadeClass = %s LIMIT 1),
+                    (SELECT ID FROM shelter WHERE ShelterClass = %s LIMIT 1),
+                    (SELECT ID FROM canopy WHERE CanopySize = %s LIMIT 1),
+                    (SELECT ID FROM foodsources WHERE SourceQuantity = %s LIMIT 1),
+                    (SELECT ID FROM birdnestingsites WHERE Level = %s LIMIT 1),
+                    (SELECT ID FROM droughttolerance WHERE DroughtTolerance = %s LIMIT 1),
+                    (SELECT ID FROM frosttolerance WHERE FrostTolerance = %s LIMIT 1),
+                    (SELECT ID FROM windtolerance WHERE WindTolerance = %s LIMIT 1),
+                    (SELECT ID FROM salttolerance WHERE SaltTolerance = %s LIMIT 1),
+                    (SELECT ID FROM sunpreference WHERE SunPreferences = %s LIMIT 1),
+                    (SELECT ID FROM soildrainage WHERE SoilDrainage = %s LIMIT 1),
+                    (SELECT ID FROM soildepth WHERE SoilDepth = %s LIMIT 1),
+                    (SELECT ID FROM soilmoisture WHERE SoilMoisture = %s LIMIT 1),
                     (SELECT ID FROM soiltype WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM wetland WHERE Score = %s LIMIT 1),
-                    (SELECT ID FROM flammability WHERE Score = %s LIMIT 1)
+                    (SELECT ID FROM wetland WHERE WetlandType = %s LIMIT 1),
+                    (SELECT ID FROM flammability WHERE Flammability = %s LIMIT 1)
                 )
                 """
                 cursor.execute(insert_plantattribute, (
@@ -703,28 +717,10 @@ def download_excel():
 
         query = """
         SELECT pd.ID as PlantID, pd.BotanicalName, pd.CommonName, pd.Family, pd.Distribution, pd.Habitat, pd.Note,
-               pa.ConservationThreatStatus, ct.Score as ConservationThreatScore, 
-               pa.Palatability, p.Score as PalatabilityScore, 
-               pa.Defoliation, d.Score as DefoliationScore, 
-               pa.GrowthRate, gr.Score as GrowthRateScore,
-               pa.ToxicParts, tp.Score as ToxicPartsScore,
-               pa.Height, h.Score as HeightScore,
-               pa.Shade, s.Score as ShadeScore,
-               pa.Shelter, sl.Score as ShelterScore,
-               pa.Canopy, c.Score as CanopyScore,
-               pa.FoodSources, fs.Score as FoodSourcesScore,
-               pa.BirdNestingSites, bn.Score as BirdNestingSitesScore,
-               pa.DroughtTolerance, dt.Score as DroughtToleranceScore,
-               pa.FrostTolerance, ft.Score as FrostToleranceScore,
-               pa.WindTolerance, wt.Score as WindToleranceScore,
-               pa.SaltTolerance, st.Score as SaltToleranceScore,
-               pa.SunPreferences, sp.Score as SunPreferencesScore,
-               pa.SoilDrainage, sd.Score as SoilDrainageScore,
-               pa.SoilDepth, sdp.Score as SoilDepthScore,
-               pa.SoilMoisture, sm.Score as SoilMoistureScore,
-               pa.SoilType, stp.Score as SoilTypeScore,
-               pa.Wetland, wl.Score as WetlandScore,
-               pa.Flammability, f.Score as FlammabilityScore
+        ct.ConservationThreatStatus, p.Level as Palatability, d.ToleranceToDefoliation,gr.GrowthRate, tp.ToxicParts,
+            h.`PlantHeight (m)`, s.ShadeClass, sl.ShelterClass, c.CanopySize, fs.SourceQuantity, bn.Level as BirdNestingSites, dt.DroughtTolerance,
+            ft.FrostTolerance, wt.WindTolerance, st.SaltTolerance, sp.SunPreferences, sd.SoilDrainage, sdp.SoilDepth,
+            sm.SoilMoisture, stp.SoilType, wl.WetlandType, f.Flammability
         FROM plantdetail pd
         LEFT JOIN plantattribute pa ON pd.ID = pa.PlantID
         LEFT JOIN conservationthreat ct ON pa.ConservationThreatStatus = ct.ID
@@ -771,4 +767,3 @@ def download_excel():
     except Exception as e:
         flash(f"Error downloading plant attributes: {str(e)}", 'danger')
         return redirect(url_for('admin.plant_detail'))
- 

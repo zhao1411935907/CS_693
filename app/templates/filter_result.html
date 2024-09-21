@@ -14,7 +14,9 @@
     <div class="card mb-4">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Your Filter Criteria</h5>
+        {% if session['ID'] %}
         <button id="saveFilterBtn" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#saveFilterModal">Save Filter</button>
+        {% endif %}
       </div>
       <div class="card-body">
         <div class="row">
@@ -26,6 +28,12 @@
         </div>
       </div>
     </div>
+    <div class="d-flex justify-content-end mb-4">
+      <a href="#" class="btn btn-success" id="download-excel-btn">
+          <i class="bi bi-download"></i> Download Excel
+      </a>
+    </div>
+    <form id="download-excel-form" action="{{ url_for('main.download_filtered_excel') }}" method="GET" style="display: none;"></form>
 
       <h1 class="display-5 mb-4">Filter Results</h1>
       <h5 class="display-5 mb-4">The top 20 plants that best match your filtering criteria</h5>
@@ -148,7 +156,52 @@ document.querySelectorAll('.progress-circle').forEach(function(circle) {
   const percentage = circle.getAttribute('data-percentage');
   circle.style.setProperty('--percentage', percentage);
 });
+
+
+document.getElementById('saveFilterAction').addEventListener('click', function() {
+    const filterName = document.getElementById('filterName').value;
+    const weightDict = JSON.parse('{{ weight_dict | tojson | safe }}');
+
+    if (!filterName) {
+        alert("Please provide a name for your filter.");
+        return;
+    }
+
+    fetch("{{ url_for('user.save_filter') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            filterName: filterName,
+            weightDict: weightDict
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Filter saved successfully!');
+            location.reload(); 
+        } else {
+            alert('Failed to save filter: ' + data.message);
+        }
+    })
+    .catch(error => console.error('Error:', error));
+});
+
+
 </script>
+
+<script type="text/javascript">
+  document.getElementById("download-excel-btn").addEventListener("click", function(event){
+      event.preventDefault(); 
+      var userConfirmed = confirm("Are you sure you want to download the filtered results as an Excel file?");
+      if (userConfirmed) {
+          document.getElementById("download-excel-form").submit(); 
+      }
+  });
+</script>
+
 
 {% endblock %}
 <html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>

@@ -1,9 +1,11 @@
-from flask import Blueprint, render_template, request, session
+from flask import Blueprint, render_template, request, session, redirect, send_file, flash, url_for
 from datetime import date
 import mysql.connector
 import connect
 from flask import jsonify
 from flask import abort
+from io import BytesIO
+import pandas as pd
 
 main_blueprint = Blueprint('main', __name__)
 
@@ -14,6 +16,11 @@ def getCursor(dictionary_cursor=False):
                                          database=connect.dbname, autocommit=True)
     cursor = connection.cursor(dictionary=dictionary_cursor)
     return cursor
+
+
+@main_blueprint.route('/home', methods=['GET', 'POST'])
+def homepage():
+    return render_template('home.html')
 
 
 @main_blueprint.route('/', methods=['GET', 'POST'])
@@ -27,11 +34,13 @@ def search():
     cursor = getCursor(dictionary_cursor=True)
     search_query = request.args.get('searchQuery', '')
     search_query = "%" + search_query + "%"
+    
     query = """
     SELECT pd.ID, pd.BotanicalName, pd.CommonName, pd.Family, pd.Distribution, pd.Habitat, pd.Image
     FROM plantdetail pd
-    WHERE  pd.is_delete=0 and  pd.BotanicalName LIKE %s OR pd.CommonName LIKE %s 
+    WHERE pd.is_delete=0 AND (pd.BotanicalName LIKE %s OR pd.CommonName LIKE %s)
     """
+    
     cursor.execute(query, (search_query, search_query))
     detailed_plants = cursor.fetchall()
     session['last_view'] = {'view_name': 'search', 'params': request.args.to_dict()}
@@ -43,6 +52,7 @@ def search():
         return render_template('index.html', message=message)
 
 
+
 # search suggestions
 @main_blueprint.route('/search_suggestions', methods=['GET'])
 def search_suggestions():
@@ -52,7 +62,7 @@ def search_suggestions():
         query = """
         SELECT pd.BotanicalName,pd.CommonName
         FROM plantdetail pd
-        WHERE pd.is_delete=0 pd.BotanicalName LIKE %s OR pd.CommonName LIKE %s
+        WHERE pd.is_delete=0 AND (pd.BotanicalName LIKE %s OR pd.CommonName LIKE %s)
         LIMIT 10 
         """
         cursor = getCursor(dictionary_cursor=True)
@@ -375,6 +385,7 @@ def final_scores():
     flammability_weight = request.args.get('flammability', 1)
 
     weight_dict = {
+        'Bird': bird_weight, 
         'Conservation Threat': conservation_threat_weight,
         'Palatability': palatability_weight,
         'Defoliation': defoliation_weight,
@@ -450,7 +461,7 @@ def final_scores():
         plant['max_scores'] = filtered_max_scores[plant['ID']]
     detailed_plants.sort(key=lambda plant: plant['Score'], reverse=True)
     session['last_view'] = {'view_name': 'final_scores', 'params': request.form.to_dict()}
-
+    session['filtered_plant_ids'] = top_plant_ids
     return render_template('filter_result.html', detailed_plants=detailed_plants, from_search=False,weight_dict=weight_dict)
 
 
@@ -513,3 +524,70 @@ def plant_detail(plant_id):
     cursor.close()
     back_url = request.host_url[0:-1] + full_path
     return render_template('plant_details.html', plant=plant_details, is_favorite=is_favorite, back_url=back_url)
+
+
+
+
+@main_blueprint.route('/download_filtered_excel', methods=['GET'])
+def download_filtered_excel():
+    try:
+        cursor = getCursor(dictionary_cursor=True)
+
+        filtered_plant_ids = session.get('filtered_plant_ids')
+        if not filtered_plant_ids:
+            flash('No filter results found to download.', 'danger')
+            return redirect(url_for('main.final_scores'))
+        query = """
+        SELECT pd.ID, pd.BotanicalName, pd.CommonName, pd.Family, pd.Distribution, pd.Habitat, pd.Note,
+ct.ConservationThreatStatus, p.Level, d.ToleranceToDefoliation,g.GrowthRate, t.ToxicParts,
+    h.`PlantHeight (m)`, s.ShadeClass, sl.ShelterClass, c.CanopySize, fs.SourceQuantity, bn.Level, dt.DroughtTolerance,
+    ft.FrostTolerance, wt.WindTolerance, st.SaltTolerance, sp.SunPreferences, sd.SoilDrainage, sdp.SoilDepth,
+    sm.SoilMoisture, stp.SoilType, wl.WetlandType, f.Flammability
+    FROM plantdetail pd
+    LEFT JOIN plantattribute pa ON pd.ID = pa.PlantID
+    LEFT JOIN conservationthreat ct ON pa.ConservationThreatStatus = ct.ID
+    LEFT JOIN palatability p ON pa.Palatability = p.ID
+    LEFT JOIN defoliation d ON pa.Defoliation = d.ID
+    LEFT JOIN growthrate g ON pa.GrowthRate = g.ID
+    LEFT JOIN toxicparts t ON pa.ToxicParts = t.ID
+    LEFT JOIN height h ON pa.Height = h.ID
+    LEFT JOIN shade s ON pa.Shade = s.ID
+    LEFT JOIN shelter sl ON pa.Shelter = sl.ID
+    LEFT JOIN canopy c ON pa.Canopy = c.ID
+    LEFT JOIN foodsources fs ON pa.FoodSources = fs.ID
+    LEFT JOIN birdnestingsites bn ON pa.BirdNestingSites = bn.ID
+    LEFT JOIN droughttolerance dt ON pa.DroughtTolerance = dt.ID
+    LEFT JOIN frosttolerance ft ON pa.FrostTolerance = ft.ID
+    LEFT JOIN windtolerance wt ON pa.WindTolerance = wt.ID
+    LEFT JOIN salttolerance st ON pa.SaltTolerance = st.ID
+    LEFT JOIN sunpreference sp ON pa.SunPreferences = sp.ID
+    LEFT JOIN soildrainage sd ON pa.SoilDrainage = sd.ID
+    LEFT JOIN soildepth sdp ON pa.SoilDepth = sdp.ID
+    LEFT JOIN soilmoisture sm ON pa.SoilMoisture = sm.ID
+    LEFT JOIN soiltype stp ON pa.SoilType = stp.ID
+    LEFT JOIN wetland wl ON pa.Wetland = wl.ID
+    LEFT JOIN flammability f ON pa.Flammability = f.ID
+        WHERE pd.ID IN (%s)
+        """ % ','.join(['%s'] * len(filtered_plant_ids))
+
+        cursor.execute(query, filtered_plant_ids)
+        plant_data = cursor.fetchall()
+
+        # Sort the data in the order of top_plant_ids.
+        plant_data_sorted = sorted(plant_data, key=lambda x: filtered_plant_ids.index(x['ID']))
+
+        output = BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+
+        df = pd.DataFrame(plant_data_sorted)
+        df.to_excel(writer, index=False, sheet_name='Filtered Plants')
+
+        writer.close()
+        output.seek(0)
+        return send_file(output, download_name="filtered_plants.xlsx", as_attachment=True)
+
+    except Exception as e:
+        flash(f"Error downloading filtered plants: {str(e)}", 'danger')
+        return redirect(url_for('main.final_scores'))
+
+

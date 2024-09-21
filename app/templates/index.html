@@ -1,181 +1,264 @@
 {% extends 'layout.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Plant Filter{% endblock %}
 
 {% block content %}
+<div class="container-xxl py-5">
+    <div class="container text-center">
+        <h1 class="display-5 mb-4">Plant Filter</h1>
+        <p class="lead" id="introText">Introduction for each factor. Adjust the weight to reflect the importance of each factor in your plant selection.</p>
+    </div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <h1 class="display-5 mb-4">Find a plant</h1>
-            <p class="mb-4">Search by plant name</p>
 
-            <!-- Search form -->
-            <form action="{{ url_for('main.search') }}" method="get">
-                <div class="input-group mb-3">
-                    <input type="text" id="searchQuery" class="form-control" placeholder="Enter the plant’s botanical name or common name" name="searchQuery">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                </div>
-            </form>
+    <div class="container">
+        <!-- Multi-step form -->
+        <form id="plantFilterForm" action="{{ url_for('main.final_scores') }}" method="GET">
 
-            <!-- Display message if there are no results -->
-            {% if message %}
-            <div class="alert alert-warning"> {{ message }} </div>
-            {% endif %}
+            <!-- Step 1: Conservation -->
+            <div class="step" id="step1">
+                <h2 class="category-title">CONSERVATION</h2>
+                <h5>Conservation Threat Status</h5>
+                <label for="ConservationThreat">Weight: </label>
+                <input type="range" id="ConservationThreat" name="ConservationThreat" min="1" max="10" 
+                value="{{ filter.ConservationThreatScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.ConservationThreatScore if filter else 1 }}</output><br><br>
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next</button>
+            </div>
 
-            <h1 class="display-5 mb-4">Plant Filter</h1>
-            <p class="mb-4">Please adjust the weight to reflect the importance of each factor in your plant selection.</p>
-
-            <form action="{{ url_for('main.final_scores') }}" method="GET">
-
-                <div class="category-scores">
-                    <h2 class="category-title">CONSERVATION</h2>
-                    <h5 class="category-title">Conservation Threat Status</h5>
-                    <label for="ConservationThreat">Weight: </label>
-                    <input type="range" id="ConservationThreat" name="ConservationThreat" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
-
-                <div class="category-scores">
-                    <h2 class="category-title">LIVESTOCK FORAGE</h2>
-
-                    <h5 class="category-title">Palatability</h5>
-                    <label for="palatability">Weight: </label>
-                    <input type="range" id="palatability" name="palatability" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-
-                    <h5 class="category-title">Defoliation</h5>
-                    <label for="defoliation">Weight: </label>
-                    <input type="range" id="defoliation" name="defoliation" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+            <!-- Step 2: Livestock Forage -->
+            <div class="step" id="step2" style="display: none;">
+                <h2 class="category-title">LIVESTOCK FORAGE</h2>
+                <h5>Palatability</h5>
+                <label for="palatability">Weight: </label>
+                <input type="range" id="palatability" name="palatability" min="1" max="10" 
+                value="{{ filter.PalatabilityScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.PalatabilityScore if filter else 1 }}</output><br><br>
                 
-                    <h5 class="category-title">Growth Rate</h5>
-                    <label for="GrowthRate">Weight: </label>
-                    <input type="range" id="GrowthRate" name="GrowthRate" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                
+                <h5>Defoliation</h5>
+                <label for="defoliation">Weight: </label>
+                <input type="range" id="defoliation" name="defoliation" min="1" max="10" 
+                       value="{{ filter.DefoliationScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.DefoliationScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Toxic Elements</h5>
-                    <label for="ToxicElements">Weight: </label>
-                    <input type="range" id="ToxicElements" name="ToxicElements" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+                <h5>Growth Rate</h5>
+                <label for="GrowthRate">Weight: </label>
+                <input type="range" id="GrowthRate" name="GrowthRate" min="1" max="10" 
+                       value="{{ filter.GrowthRateScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.GrowthRateScore if filter else 1 }}</output><br><br>
 
-                <div class="category-scores">
-                    <h2 class="category-title">SHADE AND SHELTER</h2>
+                
+                <h5>Toxic Elements</h5>
+                <label for="ToxicElements">Weight: </label>
+                <input type="range" id="ToxicElements" name="ToxicElements" min="1" max="10"
+                value="{{ filter.ToxicPartsScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.ToxicPartsScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Height</h5>
-                    <label for="height">Weight: </label>
-                    <input type="range" id="height" name="height" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Next</button>
+            </div>
 
-                    <h5 class="category-title">Shade</h5>
-                    <label for="shade">Weight: </label>
-                    <input type="range" id="shade" name="shade" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+            <!-- Step 3: Shade and Shelter -->
+            <div class="step" id="step3" style="display: none;">
+                <h2 class="category-title">SHADE AND SHELTER</h2>
+                <h5>Height</h5>
+                <label for="height">Weight: </label>
+                <input type="range" id="height" name="height" min="1" max="10" value="{{ filter.HeightScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.HeightScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Shelter</h5>
-                    <label for="shelter">Weight: </label>
-                    <input type="range" id="shelter" name="shelter" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <h5>Shade</h5>
+                <label for="shade">Weight: </label>
+                <input type="range" id="shade" name="shade" min="1" max="10" value="{{ filter.ShadeScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.ShadeScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Canopy</h5>
-                    <label for="canopy">Weight: </label>
-                    <input type="range" id="canopy" name="canopy" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+                <h5>Shelter</h5>
+                <label for="shelter">Weight: </label>
+                <input type="range" id="shelter" name="shelter" min="1" max="10" value="{{ filter.ShelterScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.ShelterScore if filter else 1 }}</output><br><br>
 
-                <div class="category-scores">
-                    <h2 class="category-title">BUSH BIRD HABITAT</h2>
+                <h5>Canopy</h5>
+                <label for="canopy">Weight: </label>
+                <input type="range" id="canopy" name="canopy" min="1" max="10" value="{{ filter.CanopyScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.CanopyScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Food Sources</h5>
-                    <label for="FoodSources">Weight: </label>
-                    <input type="range" id="FoodSources" name="FoodSources" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(4)">Next</button>
+            </div>
 
-                    <h5 class="category-title">Bird Nesting Sites</h5>
-                    <label for="bird">Weight: </label>
-                    <input type="range" id="bird" name="bird" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+            <!-- Step 4: Bush Bird Habitat -->
+            <div class="step" id="step4" style="display: none;">
+                <h2 class="category-title">BUSH BIRD HABITAT</h5>
+                <h5>Food Sources</h5>
+                <label for="FoodSources">Weight: </label>
+                <input type="range" id="FoodSources" name="FoodSources" min="1" max="10" value="{{ filter.FoodSourcesScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.FoodSourcesScore if filter else 1 }}</output><br><br>
 
-                <div class="category-scores">
-                    <h2 class="category-title">ENVIRONMENTAL</h2>
+                <h5>Bird Nesting Sites</h5>
+                <label for="bird">Weight: </label>
+                <input type="range" id="bird" name="bird" min="1" max="10" value="{{ filter.BirdNestingSitesScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.BirdNestingSitesScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Drought Tolerance</h5>
-                    <label for="DroughtTolerance">Weight: </label>
-                    <input type="range" id="DroughtTolerance" name="DroughtTolerance" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(5)">Next</button>
+            </div>
 
-                    <h5 class="category-title">Frost Tolerance</h5>
-                    <label for="FrostTolerance">Weight: </label>
-                    <input type="range" id="FrostTolerance" name="FrostTolerance" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+            <!-- Step 5: Environmental -->
+            <div class="step" id="step5" style="display: none;">
+                <h2 class="category-title">ENVIRONMENTAL</h5>
+                <h5>Drought Tolerance</h5>
+                <label for="DroughtTolerance">Weight: </label>
+                <input type="range" id="DroughtTolerance" name="DroughtTolerance" min="1" max="10" value="{{ filter.DroughtToleranceScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.DroughtToleranceScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Wind Tolerance</h5>
-                    <label for="WindTolerance">Weight: </label>
-                    <input type="range" id="WindTolerance" name="WindTolerance" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <h5>Frost Tolerance</h5>
+                <label for="FrostTolerance">Weight: </label>
+                <input type="range" id="FrostTolerance" name="FrostTolerance" min="1" max="10" value="{{ filter.FrostToleranceScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.FrostToleranceScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Salt Tolerance</h5>
-                    <label for="SaltTolerance">Weight: </label>
-                    <input type="range" id="SaltTolerance" name="SaltTolerance" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <h5>Wind Tolerance</h5>
+                <label for="WindTolerance">Weight: </label>
+                <input type="range" id="WindTolerance" name="WindTolerance" min="1" max="10" value="{{ filter.WindToleranceScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.WindToleranceScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Sun/Shade</h5>
-                    <label for="SunShade">Weight: </label>
-                    <input type="range" id="SunShade" name="SunShade" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+                <h5>Salt Tolerance</h5>
+                <label for="SaltTolerance">Weight: </label>
+                <input type="range" id="SaltTolerance" name="SaltTolerance" min="1" max="10" value="{{ filter.SaltToleranceScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SaltToleranceScore if filter else 1 }}</output><br><br>
 
-                <div class="category-scores">
-                    <h2 class="category-title">SOIL</h2>
+                <h5>Sun/Shade</h5>
+                <label for="SunShade">Weight: </label>
+                <input type="range" id="SunShade" name="SunShade" min="1" max="10" value="{{ filter.SunPreferencesScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SunPreferencesScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Soil Drainage</h5>
-                    <label for="SoilDrainage">Weight: </label>
-                    <input type="range" id="SoilDrainage" name="SoilDrainage" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(6)">Next</button>
+            </div>
 
-                    <h5 class="category-title">Soil Depth</h5>
-                    <label for="SoilDepth">Weight: </label>
-                    <input type="range" id="SoilDepth" name="SoilDepth" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+            <!-- Step 6: Soil -->
+            <div class="step" id="step6" style="display: none;">
+                <h2 class="category-title">SOIL</h2>
+                <h5>Soil Drainage</h5>
+                <label for="SoilDrainage">Weight: </label>
+                <input type="range" id="SoilDrainage" name="SoilDrainage" min="1" max="10" value="{{ filter.SoilDrainageScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SoilDrainageScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Soil Moisture</h5>
-                    <label for="SoilMoisture">Weight: </label>
-                    <input type="range" id="SoilMoisture" name="SoilMoisture" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
+                <h5>Soil Depth</h5>
+                <label for="SoilDepth">Weight: </label>
+                <input type="range" id="SoilDepth" name="SoilDepth" min="1" max="10" value="{{ filter.SoilDepthScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SoilDepthScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Soil Type</h5>
-                    <label for="SoilType">Weight: </label>
-                    <input type="range" id="SoilType" name="SoilType" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+                <h5>Soil Moisture</h5>
+                <label for="SoilMoisture">Weight: </label>
+                <input type="range" id="SoilMoisture" name="SoilMoisture" min="1" max="10" value="{{ filter.SoilMoistureScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SoilMoistureScore if filter else 1 }}</output><br><br>
 
-                <div class="category-scores">
-                    <h2 class="category-title">WETLAND</h2>
+                <h5>Soil Type</h5>
+                <label for="SoilType">Weight: </label>
+                <input type="range" id="SoilType" name="SoilType" min="1" max="10" value="{{ filter.SoilTypeScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.SoilTypeScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Wetland</h5>
-                    <label for="wetland">Weight: </label>
-                    <input type="range" id="wetland" name="wetland" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(5)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(7)">Next</button>
+            </div>
 
-                <div class="category-scores">
-                    <h2 class="category-title">FLAMMABILITY</h2>
+            <!-- Step 7: Wetland and Flammability -->
+            <div class="step" id="step7" style="display: none;">
+                <h2 class="category-title">WETLAND</h2>
+                <h5>Wetland</h5>
+                <label for="wetland">Weight: </label>
+                <input type="range" id="wetland" name="wetland" min="1" max="10" value="{{ filter.WetlandScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.WetlandScore if filter else 1 }}</output><br><br>
 
-                    <h5 class="category-title">Flammability</h5>
-                    <label for="flammability">Weight: </label>
-                    <input type="range" id="flammability" name="flammability" min="1" max="10" value="1" oninput="this.nextElementSibling.value = this.value">
-                    <output>1</output><br><br>
-                </div>
-                <!-- Reset button -->
-                <button type="reset" class="btn btn-reset py-3 px-4" style="margin-bottom: 30px;">Reset All</button>
-                <!-- Submit button -->
-                <button class="btn btn-primary py-3 px-4" type="submit" id="submitScores" style="margin-bottom: 30px;">Find a Plant</button>
-            </form>
-        </div>
+                <button type="button" class="btn btn-secondary" onclick="prevStep(6)">Previous</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(8)">Next</button>
+            </div>
+
+            <!-- Step 8: Flammability (moved from step 7) -->
+            <div class="step" id="step8" style="display: none;">
+                <h2 class="category-title">FLAMMABILITY</h2>
+                <h5>Flammability</h5>
+                <label for="flammability">Weight: </label>
+                <input type="range" id="flammability" name="flammability" min="1" max="10" value="{{ filter.FlammabilityScore if filter else 1 }}" oninput="this.nextElementSibling.value = this.value">
+                <output>{{ filter.FlammabilityScore if filter else 1 }}</output><br><br>
+
+                <button type="button" class="btn btn-secondary" onclick="prevStep(7)">Previous</button>
+            </div>
+
+            <!-- Submit and Clear buttons outside steps -->
+            <div class="form-actions text-right mt-3">
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear</button>
+                <button type="submit" class="btn btn-success">Submit</button>
+            </div>
+        </form>
+       <!-- Progress Bar under the form -->
+       <div class="progress-bar-wrapper mt-5">
+        <ul class="progressbar">
+            <li class="active" onclick="nextStep(1)">1</li>
+            <li onclick="nextStep(2)">2</li>
+            <li onclick="nextStep(3)">3</li>
+            <li onclick="nextStep(4)">4</li>
+            <li onclick="nextStep(5)">5</li>
+            <li onclick="nextStep(6)">6</li>
+            <li onclick="nextStep(7)">7</li>
+            <li onclick="nextStep(8)">8</li>
+        </ul>
     </div>
 </div>
+</div>
+
+<!-- JavaScript to handle steps -->
+<script>
+    const introTexts = [
+        "Introduction for each factor. Adjust the weight to reflect the importance of each factor in your plant selection.",
+        "Conservation factor description.",
+        "Livestock forage factor description.",
+        "Shade and shelter factor description.",
+        "Bush bird habitat factor description.",
+        "Environmental factor description.",
+        "Soil factor description.",
+        "Wetland factor description.",
+        "Flammability and review factor description."
+    ];
+
+    function nextStep(stepNumber) {
+        document.querySelectorAll('.step').forEach(function(step) {
+            step.style.display = 'none';
+        });
+        document.getElementById('step' + stepNumber).style.display = 'block';
+        updateProgressBar(stepNumber);
+        updateIntroText(stepNumber);
+    }
+
+    function prevStep(stepNumber) {
+        nextStep(stepNumber);
+    }
+
+    function updateProgressBar(stepNumber) {
+        const progressItems = document.querySelectorAll('.progressbar li');
+        progressItems.forEach(function(item, index) {
+            if (index < stepNumber) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+    }
+
+    function updateIntroText(stepNumber) {
+        const introTextElement = document.getElementById('introText');
+        introTextElement.innerText = introTexts[stepNumber - 1];
+    }
+
+    // Clear the form
+    function clearForm() {
+        document.getElementById('plantFilterForm').reset();
+        document.querySelectorAll('output').forEach(output => output.innerText = '1');
+        nextStep(1);
+    }
+
+    // Initialize step 1 as default
+    nextStep(1);
+</script>
 
 {% endblock %}
 <html xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882"><head>

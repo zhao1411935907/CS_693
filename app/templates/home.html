@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Shop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jost:wght@500;600;700&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#"><img src="logo.png" alt="Logo" style="height: 50px;"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Products</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Guide</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-search"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-user"></i></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-heart"></i></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section d-flex align-items-center" style="background-color: #0b6059;">
+        <div class="container text-light">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1>Lorem ipsum odor amet, consectetur adipiscing elit.</h1>
+                    <p>Ante eget class nisi cubilia est sollicitudin. Ventibulum volutpat per integer varius congue iaculis ultricies.</p>
+                    <a href="#" class="btn btn-light">Explore plants</a>
+                </div>
+                <div class="col-md-6 text-center">
+                    <img src="plant-new.png" alt="New Plant" class="img-fluid mb-3">
+                    <img src="plant-featured.png" alt="Featured Plant" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Section -->
+    <section class="featured-section py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between">
+                <h2>Featured</h2>
+                <a href="#" class="text-dark">view all</a>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <img src="plant1.jpg" class="img-fluid" alt="Plant 1">
+                    <h5>Peperomia Ginny</h5>
+                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
+                </div>
+                <div class="col-md-2">
+                    <img src="plant2.jpg" class="img-fluid" alt="Plant 2">
+                    <h5>Bird's Nest Fern</h5>
+                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
+                </div>
+                <div class="col-md-2">
+                    <img src="plant3.jpg" class="img-fluid" alt="Plant 3">
+                    <h5>Large Majesty Palm</h5>
+                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
+                </div>
+                <div class="col-md-2">
+                    <img src="plant4.jpg" class="img-fluid" alt="Plant 4">
+                    <h5>Pet Friendly Plant</h5>
+                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Search Section -->
+    <section class="search-section py-5 bg-light">
+        <div class="container text-center">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search plants">
+                        <button class="btn btn-dark"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Section -->
+    <section class="new-section py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between">
+                <h2>New</h2>
+                <a href="#" class="text-dark">view all</a>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <img src="new1.jpg" class="img-fluid" alt="New Plant 1">
+                    <div class="overlay">
+                        <h5>Blue Lily</h5>
+                        <p>more information</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <img src="new2.jpg" class="img-fluid" alt="New Plant 2">
+                </div>
+                <div class="col-md-3">
+                    <img src="new3.jpg" class="img-fluid" alt="New Plant 3">
+                </div>
+                <div class="col-md-3">
+                    <img src="new4.jpg" class="img-fluid" alt="New Plant 4">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact-section py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Lorem ipsum odor amet.</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    <p><i class="fas fa-phone"></i> xxxxxx</p>
+                    <p><i class="fas fa-envelope"></i> xxxxxx</p>
+                </div>
+                <div class="col-md-6">
+                    <h4>Visit us</h4>
+                    <p>*******</p>
+                    <p>Open day: 11am–5:30pm everyday</p>
+                    <a href="#" class="btn btn-dark">Get Directions</a>
+                    <div class="map mt-3">
+                        <!-- Embedded map iframe here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-3">
+        <p>&copy; 2024 Plant Shop. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
