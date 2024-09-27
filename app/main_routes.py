@@ -18,12 +18,25 @@ def getCursor(dictionary_cursor=False):
     return cursor
 
 
-@main_blueprint.route('/home', methods=['GET', 'POST'])
-def homepage():
-    return render_template('home.html')
-
-
 @main_blueprint.route('/', methods=['GET', 'POST'])
+def homepage():
+    cursor = getCursor(dictionary_cursor=True)
+    
+    # Fetch 4 newest plants for the 'New' section
+    cursor.execute("SELECT * FROM plantdetail WHERE is_delete=0 ORDER BY ID DESC LIMIT 4")
+    new_plants = cursor.fetchall()
+
+    # Fetch favorite plants if the user is logged in
+    favorite_plants = []
+    if 'user_logged_in' or 'admin_logged_in' in session:
+        user_id = session.get('ID')
+        cursor.execute("SELECT plantdetail.ID, plantdetail.BotanicalName, plantdetail.CommonName, plantdetail.Family, plantdetail.Image FROM plantdetail JOIN favorite ON plantdetail.ID = favorite.Plant WHERE favorite.User = %s AND plantdetail.is_delete=0 LIMIT 4", (user_id,))
+        favorite_plants = cursor.fetchall()
+    
+    print(favorite_plants)
+    return render_template('home.html',  new_plants=new_plants, favorite_plants=favorite_plants)
+
+@main_blueprint.route('/home', methods=['GET', 'POST'])
 def home():
     return render_template('index.html')
 
@@ -46,10 +59,10 @@ def search():
     session['last_view'] = {'view_name': 'search', 'params': request.args.to_dict()}
 
     if detailed_plants:
-        return render_template('filter_result.html', detailed_plants=detailed_plants, from_search=True)
+        return render_template('filter_result.html', detailed_plants=detailed_plants, from_search=True,weight_dict={})
     else:
-        message = "No results found. Please adjust your search criteria and try again."
-        return render_template('index.html', message=message)
+        flash("No results found. Please adjust your search criteria and try again.", "info")
+        return redirect(request.referrer or url_for('main.index'))
 
 
 

@@ -60,7 +60,7 @@
 <body>
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light sticky-top p-0">
-        <a href="/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="{{ url_for('main.homepage') }}" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <img src="{{ url_for('static', filename='img/logo.png') }}" alt="LOGO" style="height: 100px; margin-right: 10px;">
             <h1 class="m-0" style="font-size: 24px;">Plant Suitability for Dryland Agro-Ecosystems</h1>
         </a>
@@ -75,17 +75,30 @@
                     <input type="text" id="searchQuery" class="form-control" placeholder="Search plants" name="searchQuery" style="width: 100%; height: 100%;">
                     <button class="btn btn-primary ms-2" type="submit" style="height: 100%;">Search</button>
                 </form>
-    
-                <a href="{{ url_for('main.home') }}" class="nav-item nav-link active">Home</a>
-                {% if session.get('admin_logged_in') %}
-                    <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item nav-link">Admin Dashboard</a>
-                    <a href="{{ url_for('user.logout') }}" class="nav-item nav-link">Logout</a>
-                {% elif session.get('user_logged_in') %}
-                    <a href="{{ url_for('user.user_dashboard') }}" class="nav-item nav-link">User Dashboard</a>
-                    <a href="{{ url_for('user.logout') }}" class="nav-item nav-link">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('user.login') }}" class="nav-item nav-link">Login</a>
-                {% endif %}
+            <!-- Home Icon -->
+            <a href="{{ url_for('main.homepage') }}" class="nav-item nav-link">
+                <i class="fas fa-home"></i>
+            </a>
+                
+            <!-- Filter Page Icon -->
+            <a href="{{ url_for('main.home') }}" class="nav-item nav-link">
+                <i class="fas fa-filter"></i>
+            </a>
+
+            <!-- Dashboard Icon (Admin or User) -->
+            {% if session.get('admin_logged_in') %}
+                <a href="{{ url_for('admin.admin_dashboard') }}" class="nav-item nav-link">
+                    <i class="fas fa-user-alt"></i>
+                </a>
+                <a href="{{ url_for('user.logout') }}" class="nav-item nav-link">Logout</a>
+            {% elif session.get('user_logged_in') %}
+                <a href="{{ url_for('user.user_dashboard') }}" class="nav-item nav-link">
+                    <i class="fas fa-user"></i>
+                </a>
+                <a href="{{ url_for('user.logout') }}" class="nav-item nav-link">Logout</a>
+            {% else %}
+                <a href="{{ url_for('user.login') }}" class="nav-item nav-link">Login</a>
+            {% endif %}
             </div>
         </div>
         

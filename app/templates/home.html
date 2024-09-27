@@ -10,99 +10,173 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body>
+        <!-- Flash Messages Area -->
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %} 
+          </div>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg" style="background-color: #0b6059;">
         <div class="container">
-            <a class="navbar-brand" href="#"><img src="logo.png" alt="Logo" style="height: 50px;"></a>
+            <a class="navbar-brand" href="{{ url_for('main.homepage') }}">
+                <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Logo" style="height: 70px; margin-right: 10px;">
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Products</a>
+                        <a class="nav-link" href="#" style="color: #ffffff;">
+                            <i class="fas fa-search fa-2x"></i>
+                        </a>
                     </li>
+                    {% if session.get('admin_logged_in') %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Guide</a>
+                        <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}" style="color: #ffffff;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
                     </li>
+                    {% elif session.get('user_logged_in') %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-search"></i></a>
+                        <a class="nav-link" href="{{ url_for('user.user_dashboard') }}" style="color: #ffffff;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
                     </li>
+                    {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-user"></i></a>
+                        <a class="nav-link" href="{{ url_for('user.login') }}" style="color: #ffffff;">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
                     </li>
+                    {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="fas fa-heart"></i></a>
+                        <a class="nav-link" href="{{ url_for('user.favorite_plants_view') }}" style="color: #ffffff;">
+                            <i class="fas fa-heart fa-2x"></i>
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-
+    
     <!-- Hero Section -->
-    <section class="hero-section d-flex align-items-center" style="background-color: #0b6059;">
-        <div class="container text-light">
+    <section class="hero-section d-flex align-items-center" style="background-color: #0b6059; padding-bottom: 100px;">
+        <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h1>Lorem ipsum odor amet, consectetur adipiscing elit.</h1>
-                    <p>Ante eget class nisi cubilia est sollicitudin. Ventibulum volutpat per integer varius congue iaculis ultricies.</p>
-                    <a href="#" class="btn btn-light">Explore plants</a>
+                <div class="col-md-6 text-white">
+                    <h1>Plant Suitability for Dryland Agro-Ecosystems</h1>
+                    <p>A website that helps you filter plants.</p>
+                    <a href="{{ url_for('main.home') }}" class="btn btn-light">Explore plants</a>
                 </div>
-                <div class="col-md-6 text-center">
-                    <img src="plant-new.png" alt="New Plant" class="img-fluid mb-3">
-                    <img src="plant-featured.png" alt="Featured Plant" class="img-fluid">
+    
+                <div class="col-md-6">
+                    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for plant in new_plants %}
+                            <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                                <div style="position: absolute; top: 10px; left: 10px;">
+                                    <button class="btn btn-success" onclick="scrollToNewSection()">New</button>
+                                </div>
+                                {% if plant.Image %}
+                                <img src="{{ url_for('static', filename='img/' + plant.Image) }}" class="d-block w-100" alt="{{ plant.BotanicalName }}" style="height: 400px; object-fit: cover;">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" class="d-block w-100" alt="{{ plant.BotanicalName }}" style="height: 400px; object-fit: cover;">
+                                {% endif %}
+                                <div class="carousel-caption d-md-block" style="background-color: rgba(0, 0, 0, 0.5); padding: 10px; bottom: 20px; left: 0; right: 0;">
+                                    <h5 class="text-white">{{ plant.BotanicalName }}</h5>
+                                    <a href="{{ url_for('main.plant_detail', plant_id=plant.ID) }}" class="btn btn-outline-light">Read More</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+    
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Featured Section -->
+    <!-- Introduction Section -->
+<section class="introduction-section py-5 text-center">
+    <div class="container">
+        <h2>Introduction</h2>
+        <p>Welcome to Your Favorite Plants</p>
+        <p>We are a website that helps you sort through plants. Here, </p>
+        <p>you can not only do simple searches but also find the plants you want and like by</p>
+        <p>weighting different plant characteristics.</p>
+        <p>We support you in saving and downloading your filtered result data.</p>
+    </div>
+</section>
+    
+    <!-- Favorite Section -->
     <section class="featured-section py-5">
         <div class="container">
             <div class="d-flex justify-content-between">
-                <h2>Featured</h2>
-                <a href="#" class="text-dark">view all</a>
+                <h2>Favorites</h2>
+                <a href="{{ url_for('user.favorite_plants_view') }}" class="text-dark">View All</a>
             </div>
             <div class="row">
-                <div class="col-md-2">
-                    <img src="plant1.jpg" class="img-fluid" alt="Plant 1">
-                    <h5>Peperomia Ginny</h5>
-                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
-                </div>
-                <div class="col-md-2">
-                    <img src="plant2.jpg" class="img-fluid" alt="Plant 2">
-                    <h5>Bird's Nest Fern</h5>
-                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
-                </div>
-                <div class="col-md-2">
-                    <img src="plant3.jpg" class="img-fluid" alt="Plant 3">
-                    <h5>Large Majesty Palm</h5>
-                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
-                </div>
-                <div class="col-md-2">
-                    <img src="plant4.jpg" class="img-fluid" alt="Plant 4">
-                    <h5>Pet Friendly Plant</h5>
-                    <a href="#" class="btn btn-outline-dark btn-sm">Detail</a>
-                </div>
+                {% if favorite_plants %}
+                    {% for plant in favorite_plants %}
+                    <div class="col-md-3">
+                        <div class="plant-card" style="position: relative;">
+                            {% if plant.Image %}
+                            <img src="{{ url_for('static', filename='img/' + plant.Image) }}" class="img-fluid" alt="{{ plant.BotanicalName }}" style="height: 200px; width: 100%; object-fit: cover;">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" class="img-fluid" alt="No image available" style="height: 200px; width: 100%; object-fit: cover;">
+                            {% endif %}
+                            <div class="plant-caption" style="position: absolute; bottom: 0; left: 0; right: 0; background-color: rgba(0, 0, 0, 0.5); padding: 10px;">
+                                <h5 class="text-white">{{ plant.BotanicalName }}</h5>
+                                <a href="{{ url_for('main.plant_detail', plant_id=plant.ID) }}" class="btn btn-outline-light btn-sm">Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No favorite plants found.</p>
+                {% endif %}
             </div>
         </div>
     </section>
 
     <!-- Search Section -->
-    <section class="search-section py-5 bg-light">
-        <div class="container text-center">
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search plants">
-                        <button class="btn btn-dark"><i class="fas fa-search"></i></button>
-                    </div>
+    <section class="search-section py-5" style="background-color: #edfdfc">
+        <form action="{{ url_for('main.search') }}" method="get">
+            <div class="container text-center">
+                <div class="row justify-content-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button class="btn btn-dark" type="submit"><i class="fas fa-search"></i></button>
+                            </div>
+                            <input type="text" id="searchQuery" class="form-control" placeholder="Search plants" name="searchQuery">
+                        </div>
                 </div>
             </div>
-        </div>
+        </form>
     </section>
 
     <!-- New Section -->
@@ -110,58 +184,105 @@
         <div class="container">
             <div class="d-flex justify-content-between">
                 <h2>New</h2>
-                <a href="#" class="text-dark">view all</a>
+                <a href="{{ url_for('main.home') }}" class="text-dark">View All</a>
             </div>
             <div class="row">
+                {% for plant in new_plants %}
                 <div class="col-md-3">
-                    <img src="new1.jpg" class="img-fluid" alt="New Plant 1">
-                    <div class="overlay">
-                        <h5>Blue Lily</h5>
-                        <p>more information</p>
+                    <div class="plant-card" style="position: relative;">
+                        {% if plant.Image %}
+                        <img src="{{ url_for('static', filename='img/' + plant.Image) }}" class="img-fluid" alt="{{ plant.BotanicalName }}" style="height: 200px; width: 100%; object-fit: cover;">
+                        {% else %}
+                        <img src="{{ url_for('static', filename='img/no_img_available.jpg') }}" class="img-fluid" alt="No image available" style="height: 200px; width: 100%; object-fit: cover;">
+                        {% endif %}
+                        <div class="plant-caption" style="position: absolute; bottom: 0; left: 0; right: 0; background-color: rgba(0, 0, 0, 0.5); padding: 10px;">
+                            <h5 class="text-white">{{ plant.BotanicalName }}</h5>
+                            <a href="{{ url_for('main.plant_detail', plant_id=plant.ID) }}" class="btn btn-outline-light btn-sm">Detail</a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <img src="new2.jpg" class="img-fluid" alt="New Plant 2">
-                </div>
-                <div class="col-md-3">
-                    <img src="new3.jpg" class="img-fluid" alt="New Plant 3">
-                </div>
-                <div class="col-md-3">
-                    <img src="new4.jpg" class="img-fluid" alt="New Plant 4">
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>
+<!-- About Section -->
+<section class="about-section py-5" style="background-color: #fff2ff;">
+    <div class="container text-center">
+        <h4>About</h4>
+        <p>We are passionate about plants and nature. Contact US.</p>
+        <p><i class="fas fa-phone"></i> Phone: xxxxxx</p>
+        <p><i class="fas fa-envelope"></i> Email: xxxxxx</p>
+    </div>
+</section>
 
-    <!-- Contact Section -->
-    <section class="contact-section py-5 bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Lorem ipsum odor amet.</h4>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                    <p><i class="fas fa-phone"></i> xxxxxx</p>
-                    <p><i class="fas fa-envelope"></i> xxxxxx</p>
-                </div>
-                <div class="col-md-6">
-                    <h4>Visit us</h4>
-                    <p>*******</p>
-                    <p>Open day: 11am–5:30pm everyday</p>
-                    <a href="#" class="btn btn-dark">Get Directions</a>
-                    <div class="map mt-3">
-                        <!-- Embedded map iframe here -->
-                    </div>
+
+<!-- Visit Us Section -->
+<section class="visit-us-section py-5" >
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h4>Visit Us</h4>
+                <p>Address: *******</p>
+                <p>Open day: 11am–5:30pm everyday</p>
+                <a href="https://maps.google.com" class="btn btn-dark" target="_blank">Get Directions</a>
+                <div class="map mt-3" style="height: 300px;">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2887.155381390711!2d172.46312012661795!3d-43.64493546823411!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6d321bdc6eb937d3%3A0xcfca4fbe9a6cc6a5!2z5p6X6IKv5aSn5a2m!5e0!3m2!1sen-us!2snz!4v1726992461268!5m2!1sen-us!2snz"
+                        width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen="" aria-hidden="false" tabindex="0">
+                    </iframe>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
 
     <!-- Footer -->
     <footer class="text-center py-3">
-        <p>&copy; 2024 Plant Shop. All rights reserved.</p>
+        <p>&copy; 2024 Plantfliter. All rights reserved.</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
+
+<script>
+    document.querySelector('.fa-search').addEventListener('click', function() {
+        document.querySelector('.search-section').scrollIntoView({ behavior: 'smooth' });
+    });
+</script>
+<script>
+    function scrollToNewSection() {
+        document.querySelector('.new-section').scrollIntoView({ behavior: 'smooth' });
+    }
+    </script>
+    
+<script>
+    $(document).ready(function() {
+        $("#searchQuery").autocomplete({
+            source: "{{ url_for('main.search_suggestions') }}",
+            minLength: 2,
+            html: true,  
+            open: function(event, ui) {
+                $(".ui-autocomplete").css("z-index", 1000);
+            },
+            select: function(event, ui) {
+                $(this).val(ui.item.value);
+                return false; 
+            },
+            create: function () {
+                $(this).data('ui-autocomplete')._renderItem = function (ul, item) {
+                    return $("<li class='ui-autocomplete-row'></li>")
+                        .data("item.autocomplete", item)
+                        .append(`<div style='font-weight: bold;'>${item.label}</div>`)
+                        .appendTo(ul);
+                };
+            }
+        }).autocomplete("instance")._renderItem = function(ul, item) {
+            return $("<li class='ui-autocomplete-row'>")
+                .append(`<div style='font-weight:bold; color: #007BFF;'>${item.label.split('<br>')[0]}</div><div class='common-name'>${item.label.split('<br>')[1]}</div>`)
+                .appendTo(ul);
+        };
+    });
+    </script>
