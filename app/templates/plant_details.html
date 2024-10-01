@@ -60,17 +60,6 @@
 
 {% block content %}
 <div class="container py-5">
-    {% if not session.get('from_favorites', False) %}
-        {% if session.last_view.view_name == 'search' %}
-            <a href="{{ url_for('main.search', **session.last_view.params) }}" class="back-to-search">
-                <i class="bi bi-backspace"></i> Back 
-            </a>
-        {% elif session.last_view.view_name == 'final_scores' %}
-            <a href="{{ back_url }}" class="back-to-search">
-                <i class="bi bi-backspace"></i> Back
-            </a>
-        {% endif %}
-    {% endif %}
   
     <br>
     <br>

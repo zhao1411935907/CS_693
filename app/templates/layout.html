@@ -104,7 +104,11 @@
         
     </nav>
     <!-- Navbar End -->
-
+    <div class="container-xxl py-5">
+        <a href="#" onclick="window.history.back(); return false;" class="back-to-search">
+            <i class="bi bi-backspace"></i> Back
+        </a>
+    </div>
     <!-- Flash Messages Area -->
     <div class="container mt-3">
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -117,6 +121,7 @@
           {% endif %}
       {% endwith %} 
     </div>
+
 
     {% block content %}
     {% endblock %}
@@ -140,7 +145,6 @@
         </div>
     </div>
 </div>
-
 
 
 

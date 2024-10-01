@@ -279,7 +279,7 @@ def soil_results(soil_drainage_weight, soil_depth_weight, soil_moisture_weight, 
     # Calculate the overall score
     query = """
     SELECT pa.PlantID,
-           (sd.Score * %s + sde.Score * %s + sm.Score * %s + stp.Score * %s) AS OverallScore
+           (sd.Score * %s + sde.Score * %s + sm.Score * %s + stp.Score * %s) OverallScore
     FROM plantattribute pa
     JOIN soildrainage sd ON pa.SoilDrainage = sd.ID
     JOIN soildepth sde ON pa.SoilDepth = sde.ID
@@ -439,6 +439,7 @@ def final_scores():
     max_scores = {}
     for score_list in scores:
         for entry in score_list:
+            print(entry)
             plant_id = entry['PlantID']
             if plant_id not in final_scores:
                 final_scores[plant_id] = 0
