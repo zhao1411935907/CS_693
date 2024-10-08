@@ -11,7 +11,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </head>
 
@@ -29,46 +28,36 @@
             {% endwith %} 
           </div>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg" style="background-color: #0b6059;">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top p-0" style="background-color: #0b6059;">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.homepage') }}">
+            <a class="navbar-brand d-flex align-items-center px-4 px-lg-5" href="{{ url_for('main.homepage') }}">
                 <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="Logo" style="height: 70px; margin-right: 10px;">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler me-4" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" style="color: #ffffff;">
-                            <i class="fas fa-search fa-2x"></i>
-                        </a>
-                    </li>
+                <div class="navbar-nav ms-auto p-4 p-lg-0 d-flex align-items-center">
+                    <a class="nav-link" href="#" style="color: #ffffff;">
+                        <i class="fas fa-search fa-2x"></i>
+                    </a>
                     {% if session.get('admin_logged_in') %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}" style="color: #ffffff;">
-                            <i class="fas fa-user fa-2x"></i>
-                        </a>
-                    </li>
+                    <a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}" style="color: #ffffff;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </a>
                     {% elif session.get('user_logged_in') %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user.user_dashboard') }}" style="color: #ffffff;">
-                            <i class="fas fa-user fa-2x"></i>
-                        </a>
-                    </li>
+                    <a class="nav-link" href="{{ url_for('user.user_dashboard') }}" style="color: #ffffff;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </a>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user.login') }}" style="color: #ffffff;">
-                            <i class="fas fa-user fa-2x"></i>
-                        </a>
-                    </li>
+                    <a class="nav-link" href="{{ url_for('user.login') }}" style="color: #ffffff;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </a>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('user.favorite_plants_view') }}" style="color: #ffffff;">
-                            <i class="fas fa-heart fa-2x"></i>
-                        </a>
-                    </li>
-                </ul>
+                    <a class="nav-link" href="{{ url_for('user.favorite_plants_view') }}" style="color: #ffffff;">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
@@ -241,7 +230,7 @@
     <footer class="text-center py-3">
         <p>&copy; 2024 Plantfliter. All rights reserved.</p>
     </footer>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
