@@ -439,7 +439,6 @@ def final_scores():
     max_scores = {}
     for score_list in scores:
         for entry in score_list:
-            print(entry)
             plant_id = entry['PlantID']
             if plant_id not in final_scores:
                 final_scores[plant_id] = 0
