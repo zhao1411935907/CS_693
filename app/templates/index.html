@@ -252,13 +252,23 @@
 
     // Clear the form
     function clearForm() {
-        document.getElementById('plantFilterForm').reset();
-        document.querySelectorAll('output').forEach(output => output.innerText = '1');
-        nextStep(1);
-    }
+    document.getElementById('plantFilterForm').reset();
+    document.querySelectorAll('input[type="range"]').forEach(input => {
+        input.value = '1';
+        input.nextElementSibling.value = '1';
+    });
+    document.querySelectorAll('output').forEach(output => output.innerText = '1');
+    nextStep(1);
+}
 
     // Initialize step 1 as default
     nextStep(1);
+
+    window.addEventListener('load', function() {
+    document.querySelectorAll('input[type="range"]').forEach(function(input) {
+        input.nextElementSibling.value = input.value;
+    });
+});
 </script>
 
 {% endblock %}

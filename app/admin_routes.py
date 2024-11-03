@@ -490,8 +490,7 @@ def add_plant():
             full_save_path = os.path.join(app.root_path, save_path)
             image.save(full_save_path)
 
-        if image_reference is None:
-            reference = 'Source unknown'
+        reference = image_reference or 'Source unknown'
 
 
         try:
